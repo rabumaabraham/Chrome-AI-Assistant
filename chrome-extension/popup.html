@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🤖 AI Assistant</h1>
+            <div class="theme-toggle">
+                <button id="themeToggle" class="theme-btn">🌙</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Question Input Section -->
+            <div class="input-section">
+                <div class="input-container">
+                    <textarea 
+                        id="questionInput" 
+                        placeholder="Ask me anything about this page..."
+                        rows="3"
+                    ></textarea>
+                    <div class="input-controls">
+                        <button id="voiceBtn" class="control-btn" title="Voice Input">
+                            🎤
+                        </button>
+                        <button id="screenshotBtn" class="control-btn" title="Screenshot & OCR">
+                            📷
+                        </button>
+                        <button id="askBtn" class="ask-btn">Ask AI</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="loading hidden">
+                <div class="spinner"></div>
+                <p>AI is thinking...</p>
+            </div>
+
+            <!-- Response Section -->
+            <div id="responseSection" class="response-section hidden">
+                <div class="response-header">
+                    <h3>AI Response</h3>
+                    <button id="copyBtn" class="control-btn" title="Copy Response">📋</button>
+                </div>
+                <div id="responseContent" class="response-content"></div>
+            </div>
+
+            <!-- History Section -->
+            <div id="historySection" class="history-section">
+                <div class="history-header">
+                    <h3>Recent Questions</h3>
+                    <button id="clearHistoryBtn" class="control-btn" title="Clear History">🗑️</button>
+                </div>
+                <div id="historyList" class="history-list"></div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Settings</h3>
+                    <button id="closeSettings" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="setting-item">
+                        <label for="backendUrl">Backend URL:</label>
+                        <input type="url" id="backendUrl" placeholder="http://localhost:3000">
+                    </div>
+                    <div class="setting-item">
+                        <label for="apiKey">API Key (optional):</label>
+                        <input type="password" id="apiKey" placeholder="Your OpenAI API key">
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="enableVoice"> Enable Voice Input
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="enableOCR"> Enable OCR Features
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="saveSettings" class="save-btn">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
