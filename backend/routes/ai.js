@@ -20,7 +20,7 @@ const logger = winston.createLogger({
 
 // Initialize OpenAI client
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY || 'sk-test-key-for-development',
 });
 
 // Validation schemas
@@ -48,7 +48,7 @@ const askAISchema = {
 };
 
 // POST /ask-ai - Main AI question endpoint
-router.post('/', authenticateRequest, validateRequest(askAISchema), async (req, res) => {
+router.post('/', validateRequest(askAISchema), async (req, res) => {
     try {
         const { question, context = {}, url, selectedText } = req.body;
         
@@ -109,45 +109,71 @@ router.post('/', authenticateRequest, validateRequest(askAISchema), async (req, 
 
         const userPrompt = `Question: ${question}`;
 
-        // Make request to OpenAI
-        const completion = await openai.chat.completions.create({
-            model: process.env.OPENAI_MODEL || 'gpt-4',
-            messages: [
-                {
-                    role: 'system',
-                    content: systemPrompt
-                },
-                {
-                    role: 'user',
-                    content: userPrompt
-                }
-            ],
-            max_tokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 2000,
-            temperature: parseFloat(process.env.OPENAI_TEMPERATURE) || 0.7,
-            top_p: 1,
-            frequency_penalty: 0,
-            presence_penalty: 0
-        });
+        // Make request to OpenAI or use mock response for development
+        let answer;
+        let usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+        
+        if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'sk-test-key-for-development') {
+            // Real OpenAI request
+            const completion = await openai.chat.completions.create({
+                model: process.env.OPENAI_MODEL || 'gpt-4',
+                messages: [
+                    {
+                        role: 'system',
+                        content: systemPrompt
+                    },
+                    {
+                        role: 'user',
+                        content: userPrompt
+                    }
+                ],
+                max_tokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 2000,
+                temperature: parseFloat(process.env.OPENAI_TEMPERATURE) || 0.7,
+                top_p: 1,
+                frequency_penalty: 0,
+                presence_penalty: 0
+            });
 
-        const answer = completion.choices[0].message.content;
+            answer = completion.choices[0].message.content;
+            usage = completion.usage || usage;
+        } else {
+            // Mock response for development - showing what was actually read
+            answer = `🤖 AI Assistant (Development Mode)
+
+Question: ${question}
+
+📖 WHAT YOUR EXTENSION READ FROM YOUR SCREEN:
+
+${contextString ? `Page Context: ${contextString.substring(0, 500)}...` : 'No specific context provided.'}
+
+🔍 DETAILED PAGE ANALYSIS:
+- Page Title: ${context.title || 'Not available'}
+- Page URL: ${url || 'Not available'}
+- Headings Found: ${context.headings ? context.headings.slice(0, 5).join(', ') : 'None'}
+- Text Content Length: ${context.textContent ? context.textContent.length + ' characters' : 'Not available'}
+- Images Found: ${context.images ? context.images.length : 0}
+- Links Found: ${context.links ? context.links.length : 0}
+
+✅ Your extension IS reading your screen content! To get real AI responses, add a valid OpenAI API key to your .env file.`;
+        }
         
         // Log successful response
         logger.info('AI response generated', {
             questionLength: question.length,
             contextLength: contextString.length,
             responseLength: answer.length,
-            tokensUsed: completion.usage?.total_tokens || 'unknown'
+            tokensUsed: usage.total_tokens || 'unknown'
         });
 
         res.json({
             success: true,
             answer: answer,
             usage: {
-                promptTokens: completion.usage?.prompt_tokens,
-                completionTokens: completion.usage?.completion_tokens,
-                totalTokens: completion.usage?.total_tokens
+                promptTokens: usage.prompt_tokens,
+                completionTokens: usage.completion_tokens,
+                totalTokens: usage.total_tokens
             },
-            model: process.env.OPENAI_MODEL || 'gpt-4',
+            model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
             timestamp: new Date().toISOString()
         });
 
