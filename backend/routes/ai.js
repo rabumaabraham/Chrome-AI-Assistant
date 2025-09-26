@@ -88,6 +88,11 @@ router.post('/', validateRequest(askAISchema), async (req, res) => {
             contextString += `Currently Visible Content: ${context.viewportContent}\n`;
         }
         
+        // Add current PDF content if viewing a PDF
+        if (context.isPdfViewer && context.currentPdfContent) {
+            contextString += `\n📄 CURRENT PDF CONTENT:\n${context.currentPdfContent.substring(0, 8000)}\n`;
+        }
+        
         // Add question-aware targeted content (highest priority)
         if (context.targetedContent) {
             contextString += `\n🎯 TARGETED CONTENT (Most Relevant to Question):\n${context.targetedContent}\n`;
@@ -135,6 +140,20 @@ router.post('/', validateRequest(askAISchema), async (req, res) => {
             });
         }
         
+        if (context.pdfs && context.pdfs.length > 0) {
+            contextString += `PDFs Found: ${context.pdfs.length} PDF document(s)\n`;
+            context.pdfs.forEach((pdf, i) => {
+                contextString += `PDF ${i+1}: ${pdf.text} (${pdf.src})\n`;
+            });
+        }
+        
+        if (context.embeddedDocs && context.embeddedDocs.length > 0) {
+            contextString += `Embedded Documents: ${context.embeddedDocs.length} document(s)\n`;
+            context.embeddedDocs.slice(0, 3).forEach((doc, i) => {
+                contextString += `Document ${i+1}: ${doc.text} (${doc.type})\n`;
+            });
+        }
+        
         if (selectedText) {
             contextString += `Selected Text: ${selectedText}\n`;
         }
@@ -166,6 +185,8 @@ router.post('/', validateRequest(askAISchema), async (req, res) => {
         - The exact text content the user sees on screen
         - Page structure with hierarchical headings
         - Tables, lists, forms, and images
+        - PDF documents and embedded files on the page
+        - Current PDF content if viewing a PDF document
         - Currently visible viewport content
         - Page layout and navigation elements
         
@@ -177,6 +198,10 @@ router.post('/', validateRequest(askAISchema), async (req, res) => {
         - If asked about data in tables, provide the actual values
         - If asked about forms, describe the specific input fields and their purposes
         - If asked about images, reference their alt text and context
+        - If asked about PDFs or documents, describe what documents are available on the page
+        - If viewing a PDF, you can read and analyze the actual PDF content
+        - IMPORTANT: If the page contains PDF content (marked as "CURRENT PDF CONTENT"), prioritize this content over other page elements
+        - When analyzing PDF content, provide specific details from the document text
         - If asked about navigation, describe the actual menu structure
         - If the question is about page structure, use the hierarchical headings
         - Prioritize currently visible content when relevant

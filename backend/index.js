@@ -58,7 +58,8 @@ const corsOptions = {
     origin: function (origin, callback) {
         const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
             'http://localhost:3000',
-            'chrome-extension://*'
+            'chrome-extension://*',
+            'https://rabumaabraham.github.io'
         ];
         
         // Allow requests with no origin (like mobile apps or curl requests)

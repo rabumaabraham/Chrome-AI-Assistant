@@ -43,7 +43,7 @@ const ocrSchema = {
 };
 
 // POST /ocr - Extract text from image using Tesseract.js
-router.post('/', authenticateRequest, validateRequest(ocrSchema), async (req, res) => {
+router.post('/', validateRequest(ocrSchema), async (req, res) => {
     try {
         const { image, url, language = 'eng', options = {} } = req.body;
         
@@ -127,7 +127,7 @@ router.post('/', authenticateRequest, validateRequest(ocrSchema), async (req, re
 });
 
 // POST /ocr/batch - Process multiple images
-router.post('/batch', authenticateRequest, async (req, res) => {
+router.post('/batch', async (req, res) => {
     try {
         const { images, language = 'eng', options = {} } = req.body;
         

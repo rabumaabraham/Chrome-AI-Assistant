@@ -1,9 +1,11 @@
 // AI Assistant Chrome Extension - Content Script
 class ContentScript {
     constructor() {
-        this.isFloatingButtonVisible = false;
-        this.floatingButton = null;
-        this.contextMenuEnabled = true;
+        this.state = {
+            isFloatingButtonVisible: false,
+            floatingButton: null,
+            contextMenuEnabled: true
+        };
         
         this.init();
     }
@@ -18,9 +20,9 @@ class ContentScript {
     // Floating Action Button
     createFloatingButton() {
         // Create floating button container
-        this.floatingButton = document.createElement('div');
-        this.floatingButton.id = 'ai-assistant-floating-btn';
-        this.floatingButton.innerHTML = `
+        this.state.floatingButton = document.createElement('div');
+        this.state.floatingButton.id = 'ai-assistant-floating-btn';
+        this.state.floatingButton.innerHTML = `
             <div class="ai-btn-icon">🤖</div>
             <div class="ai-btn-tooltip">Ask AI about this page</div>
         `;
@@ -90,10 +92,10 @@ class ContentScript {
         `;
         
         document.head.appendChild(style);
-        document.body.appendChild(this.floatingButton);
+        document.body.appendChild(this.state.floatingButton);
         
         // Add click event
-        this.floatingButton.addEventListener('click', () => {
+        this.state.floatingButton.addEventListener('click', () => {
             this.openPopup();
         });
         
@@ -103,10 +105,10 @@ class ContentScript {
             const currentScrollY = window.scrollY;
             if (currentScrollY > lastScrollY && currentScrollY > 100) {
                 // Scrolling down
-                this.floatingButton.style.transform = 'translateY(100px)';
+                this.state.floatingButton.style.transform = 'translateY(100px)';
             } else {
                 // Scrolling up
-                this.floatingButton.style.transform = 'translateY(0)';
+                this.state.floatingButton.style.transform = 'translateY(0)';
             }
             lastScrollY = currentScrollY;
         });
@@ -264,7 +266,7 @@ class ContentScript {
 
     // Context Menu Display
     showContextMenu(event, selectedText) {
-        if (!this.contextMenuEnabled || selectedText.length < 3) return;
+        if (!this.state.contextMenuEnabled || selectedText.length < 3) return;
         
         const contextMenu = document.getElementById('ai-context-menu');
         if (!contextMenu) return;

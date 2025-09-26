@@ -31,6 +31,9 @@
                         <button id="screenshotBtn" class="control-btn" title="Screenshot & OCR">
                             📷
                         </button>
+                        <button id="uploadBtn" class="control-btn" title="Upload PDF/Image">
+                            📄
+                        </button>
                         <button id="askBtn" class="ask-btn">Ask AI</button>
                     </div>
                 </div>
@@ -94,6 +97,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Hidden file input for uploads -->
+    <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.gif,.bmp,.webp" style="display: none;">
 
     <script src="popup.js"></script>
 </body>

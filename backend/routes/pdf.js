@@ -39,7 +39,7 @@ const pdfExtractSchema = {
 };
 
 // POST /pdf/extract - Extract text from PDF
-router.post('/extract', authenticateRequest, validateRequest(pdfExtractSchema), async (req, res) => {
+router.post('/extract', validateRequest(pdfExtractSchema), async (req, res) => {
     try {
         const { pdfData, url, options = {} } = req.body;
         
