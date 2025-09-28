@@ -335,7 +335,7 @@ function handleClear() {
 /**
  * Handle voice toggle
  */
-async function handleVoiceToggle() {
+function handleVoiceToggle() {
     if (isLoading) {
         showNotification('Please wait for current request to complete', 'warning');
         return;
@@ -349,35 +349,7 @@ async function handleVoiceToggle() {
     if (isRecording) {
         stopVoiceRecording();
     } else {
-        // Request microphone permission
-        try {
-            await requestMicrophonePermission();
-            startVoiceRecording();
-        } catch (error) {
-            console.error('Microphone permission denied:', error);
-            showNotification('Microphone permission is required for voice input', 'error');
-        }
-    }
-}
-
-/**
- * Request microphone permission
- */
-async function requestMicrophonePermission() {
-    try {
-        // Request microphone access
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Stop the stream immediately as we only needed it for permission
-        stream.getTracks().forEach(track => track.stop());
-        return true;
-    } catch (error) {
-        if (error.name === 'NotAllowedError') {
-            throw new Error('Microphone permission denied by user');
-        } else if (error.name === 'NotFoundError') {
-            throw new Error('No microphone found on this device');
-        } else {
-            throw new Error('Failed to access microphone: ' + error.message);
-        }
+        startVoiceRecording();
     }
 }
 
@@ -418,13 +390,22 @@ function startVoiceRecording() {
                     errorMessage = 'No speech detected. Please try again.';
                     break;
                 case 'audio-capture':
-                    errorMessage = 'No microphone found. Please check your microphone.';
+                    errorMessage = 'No microphone found. Please check your microphone connection.';
                     break;
                 case 'not-allowed':
-                    errorMessage = 'Microphone permission denied. Please allow microphone access.';
+                    errorMessage = 'Microphone access denied. Please allow microphone access in Chrome settings or try refreshing the page.';
                     break;
                 case 'network':
-                    errorMessage = 'Network error. Please check your connection.';
+                    errorMessage = 'Network error. Please check your internet connection.';
+                    break;
+                case 'service-not-allowed':
+                    errorMessage = 'Speech service not allowed. Please check Chrome permissions.';
+                    break;
+                case 'bad-grammar':
+                    errorMessage = 'Speech recognition grammar error. Please try again.';
+                    break;
+                default:
+                    errorMessage = `Voice recognition error: ${event.error}. Please try again.`;
                     break;
             }
             
@@ -469,10 +450,12 @@ function updateVoiceButton() {
             voiceButton.innerHTML = '🔴 Stop';
             voiceButton.style.backgroundColor = '#dc3545';
             voiceButton.style.color = 'white';
+            voiceButton.disabled = false;
         } else {
             voiceButton.innerHTML = '🎤 Voice';
             voiceButton.style.backgroundColor = '';
             voiceButton.style.color = '';
+            voiceButton.disabled = false;
         }
     }
 }
