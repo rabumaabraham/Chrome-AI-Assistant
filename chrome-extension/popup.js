@@ -14,6 +14,8 @@ const CONFIG = {
 // State
 let isLoading = false;
 let currentQuestion = '';
+let isRecording = false;
+let recognition = null;
 
 // DOM Elements
 let questionInput, askButton, voiceButton, clearButton, responseContent, loading, notification;
@@ -48,14 +50,22 @@ function setupEventListeners() {
         askButton.addEventListener('click', handleAskQuestion);
     }
     
-    if (questionInput) {
-        questionInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+        if (questionInput) {
+            questionInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleAskQuestion();
+                }
+            });
+        }
+        
+        // Add keyboard shortcut for voice input (Ctrl+Shift+V)
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'V') {
                 e.preventDefault();
-                handleAskQuestion();
+                handleVoiceToggle();
             }
         });
-    }
     
     if (clearButton) {
         clearButton.addEventListener('click', handleClear);
@@ -325,8 +335,146 @@ function handleClear() {
 /**
  * Handle voice toggle
  */
-function handleVoiceToggle() {
-    showNotification('Voice feature coming soon', 'info');
+async function handleVoiceToggle() {
+    if (isLoading) {
+        showNotification('Please wait for current request to complete', 'warning');
+        return;
+    }
+    
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        showNotification('Speech recognition not supported in this browser', 'error');
+        return;
+    }
+    
+    if (isRecording) {
+        stopVoiceRecording();
+    } else {
+        // Request microphone permission
+        try {
+            await requestMicrophonePermission();
+            startVoiceRecording();
+        } catch (error) {
+            console.error('Microphone permission denied:', error);
+            showNotification('Microphone permission is required for voice input', 'error');
+        }
+    }
+}
+
+/**
+ * Request microphone permission
+ */
+async function requestMicrophonePermission() {
+    try {
+        // Request microphone access
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Stop the stream immediately as we only needed it for permission
+        stream.getTracks().forEach(track => track.stop());
+        return true;
+    } catch (error) {
+        if (error.name === 'NotAllowedError') {
+            throw new Error('Microphone permission denied by user');
+        } else if (error.name === 'NotFoundError') {
+            throw new Error('No microphone found on this device');
+        } else {
+            throw new Error('Failed to access microphone: ' + error.message);
+        }
+    }
+}
+
+/**
+ * Start voice recording
+ */
+function startVoiceRecording() {
+    try {
+        // Initialize speech recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        
+        // Update UI
+        isRecording = true;
+        updateVoiceButton();
+        showNotification('Listening... Speak now', 'info');
+        
+        // Handle results
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            if (questionInput) {
+                questionInput.value = transcript;
+            }
+            showNotification('Voice input received', 'success');
+        };
+        
+        // Handle errors
+        recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            let errorMessage = 'Voice recognition failed';
+            
+            switch(event.error) {
+                case 'no-speech':
+                    errorMessage = 'No speech detected. Please try again.';
+                    break;
+                case 'audio-capture':
+                    errorMessage = 'No microphone found. Please check your microphone.';
+                    break;
+                case 'not-allowed':
+                    errorMessage = 'Microphone permission denied. Please allow microphone access.';
+                    break;
+                case 'network':
+                    errorMessage = 'Network error. Please check your connection.';
+                    break;
+            }
+            
+            showNotification(errorMessage, 'error');
+            stopVoiceRecording();
+        };
+        
+        // Handle end
+        recognition.onend = () => {
+            stopVoiceRecording();
+        };
+        
+        // Start recognition
+        recognition.start();
+        
+    } catch (error) {
+        console.error('Voice recording setup failed:', error);
+        showNotification('Voice recording failed to start', 'error');
+        isRecording = false;
+        updateVoiceButton();
+    }
+}
+
+/**
+ * Stop voice recording
+ */
+function stopVoiceRecording() {
+    if (recognition && isRecording) {
+        recognition.stop();
+    }
+    
+    isRecording = false;
+    updateVoiceButton();
+}
+
+/**
+ * Update voice button appearance
+ */
+function updateVoiceButton() {
+    if (voiceButton) {
+        if (isRecording) {
+            voiceButton.innerHTML = '🔴 Stop';
+            voiceButton.style.backgroundColor = '#dc3545';
+            voiceButton.style.color = 'white';
+        } else {
+            voiceButton.innerHTML = '🎤 Voice';
+            voiceButton.style.backgroundColor = '';
+            voiceButton.style.color = '';
+        }
+    }
 }
 
 /**
@@ -657,4 +805,21 @@ function extractPageContentInTab() {
     }
 }
 
-console.log('✅ Popup script loaded successfully');
+/**
+ * Cleanup function when popup is closed
+ */
+function cleanup() {
+    if (isRecording && recognition) {
+        stopVoiceRecording();
+    }
+}
+
+// Cleanup when popup is about to close
+window.addEventListener('beforeunload', cleanup);
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        cleanup();
+    }
+});
+
+console.log('✅ Popup script loaded successfully with voice support');

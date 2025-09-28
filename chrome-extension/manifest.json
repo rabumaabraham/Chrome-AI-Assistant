@@ -11,6 +11,9 @@
     "contextMenus",
     "clipboardWrite"
   ],
+  "optional_permissions": [
+    "microphone"
+  ],
   "host_permissions": [
     "http://localhost:3000/*",
     "https://rabumaabraham.github.io/*",
