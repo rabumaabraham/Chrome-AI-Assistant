@@ -35,7 +35,7 @@ class Application {
 
     setupRoutes() {
         // API routes
-        this.app.use('/', routes);
+        this.app.use('/api', routes);
 
         // 404 handler
         this.app.use('*', (req, res) => {

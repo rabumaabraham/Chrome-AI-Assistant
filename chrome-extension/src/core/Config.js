@@ -8,7 +8,7 @@ class Config {
         this.data = {
             // Backend Configuration
             backend: {
-                url: 'http://localhost:3000',
+                url: 'http://localhost:3000/api',
                 timeout: 30000,
                 retries: 3
             },

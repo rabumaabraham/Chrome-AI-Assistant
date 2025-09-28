@@ -133,12 +133,16 @@ class AIAssistant {
             // Check if this is a PDF URL
             const isPdfUrl = tab.url && tab.url.toLowerCase().includes('.pdf');
             if (isPdfUrl) {
-                this.logger.info('PDF URL detected, attempting PDF content extraction');
+                this.logger.info('PDF URL detected, attempting PDF content extraction', { url: tab.url });
                 
                 // Try to extract PDF content directly
                 try {
                     const pdfContent = await this.extractPDFContentFromURL(tab.url);
                     if (pdfContent) {
+                        this.logger.info('PDF content extracted successfully', { 
+                            contentLength: pdfContent.length,
+                            preview: pdfContent.substring(0, 200) + '...'
+                        });
                         return {
                             url: tab.url,
                             title: tab.title || 'PDF Document',
@@ -152,9 +156,11 @@ class AIAssistant {
                             currentPdfContent: pdfContent,
                             targetedContent: `Page Title: ${tab.title || 'PDF Document'}\nURL: ${tab.url}\nDocument Type: PDF Document\nPDF Content: ${pdfContent.substring(0, 2000)}${pdfContent.length > 2000 ? '...' : ''}`
                         };
+                    } else {
+                        this.logger.warn('PDF content extraction returned null/empty content');
                     }
                 } catch (pdfError) {
-                    this.logger.warn('PDF content extraction failed', pdfError);
+                    this.logger.error('PDF content extraction failed', { error: pdfError.message, stack: pdfError.stack });
                 }
             }
             
@@ -212,7 +218,11 @@ class AIAssistant {
                 title: pageContent.title,
                 isPdfViewer: pageContent.isPdfViewer,
                 imagesCount: pageContent.images?.length || 0,
-                pdfsCount: pageContent.pdfs?.length || 0
+                pdfsCount: pageContent.pdfs?.length || 0,
+                hasCurrentPdfContent: !!pageContent.currentPdfContent,
+                pdfContentLength: pageContent.currentPdfContent?.length || 0,
+                hasTargetedContent: !!pageContent.targetedContent,
+                targetedContentLength: pageContent.targetedContent?.length || 0
             });
 
             // Check if we need to extract PDF content

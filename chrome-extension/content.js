@@ -1,11 +1,11 @@
 /**
- * Content Script Entry Point - Legacy Compatibility
- * Redirects to the new modular architecture
+ * Content Script Entry Point
+ * Simple working version
  */
 
-// Import and initialize the new content controller
-import('./src/content/ContentController.js').catch(error => {
-    console.error('Failed to load modular content script:', error);
+// Load the simple content script
+import('./content-simple.js').catch(error => {
+    console.error('Failed to load content script:', error);
     
     // Fallback to basic functionality
     console.log('Using fallback content script functionality');
@@ -29,7 +29,7 @@ import('./src/content/ContentController.js').catch(error => {
     `;
     
     floatingBtn.addEventListener('click', () => {
-        alert('Please use the modular version for full functionality');
+        alert('Chrome AI Assistant - Please use the extension popup for full functionality');
     });
     
     document.body.appendChild(floatingBtn);
