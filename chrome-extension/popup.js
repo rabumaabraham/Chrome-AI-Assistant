@@ -18,7 +18,7 @@ let isRecording = false;
 let recognition = null;
 
 // DOM Elements
-let questionInput, askButton, voiceButton, clearButton, responseContent, loading, notification;
+let questionInput, askButton, voiceButton, historyButton, clearHistoryButton, messagesContainer, loading, notification;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -34,12 +34,16 @@ function initializeElements() {
     questionInput = document.getElementById('questionInput');
     askButton = document.getElementById('askBtn');
     voiceButton = document.getElementById('voiceBtn');
-    clearButton = document.getElementById('clearBtn');
-    responseContent = document.getElementById('responseContent');
+    historyButton = document.getElementById('historyBtn');
+    clearHistoryButton = document.getElementById('clearHistoryBtn');
+    messagesContainer = document.getElementById('messagesContainer');
     loading = document.getElementById('loading');
     notification = document.getElementById('notification');
     
-    // Elements initialized
+    // Auto-resize textarea
+    if (questionInput) {
+        questionInput.addEventListener('input', autoResizeTextarea);
+    }
 }
 
 /**
@@ -67,8 +71,12 @@ function setupEventListeners() {
             }
         });
     
-    if (clearButton) {
-        clearButton.addEventListener('click', handleClear);
+    if (historyButton) {
+        historyButton.addEventListener('click', handleHistoryToggle);
+    }
+    
+    if (clearHistoryButton) {
+        clearHistoryButton.addEventListener('click', handleClearHistory);
     }
     
     if (voiceButton) {
@@ -86,7 +94,7 @@ async function handleAskQuestion() {
     
     const question = questionInput?.value?.trim();
     if (!question) {
-        showNotification('Please enter a question', 'warning');
+        // No notification for empty question - just return
             return;
         }
         
@@ -107,7 +115,7 @@ async function handleAskQuestion() {
         
         if (response.success) {
             showResponse(response.answer);
-            showNotification('Response received', 'success');
+            // Response received - no notification needed
         } else {
             throw new Error(response.error || 'AI request failed');
         }
@@ -329,7 +337,7 @@ async function askAI(question, context) {
 function handleClear() {
     if (questionInput) questionInput.value = '';
     hideResponse();
-    showNotification('Cleared', 'success');
+    // Clear action completed - no notification needed
 }
 
 /**
@@ -337,12 +345,12 @@ function handleClear() {
  */
 function handleVoiceToggle() {
     if (isLoading) {
-        showNotification('Please wait for current request to complete', 'warning');
+        // Request in progress - no notification needed
         return;
     }
     
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        showNotification('Speech recognition not supported in this browser', 'error');
+        showNotification('Speech recognition not supported', 'error');
         return;
     }
     
@@ -369,7 +377,7 @@ function startVoiceRecording() {
         // Update UI
         isRecording = true;
         updateVoiceButton();
-        showNotification('Listening... Speak now', 'info');
+        // Voice recording started - update button state only
         
         // Handle results
         recognition.onresult = (event) => {
@@ -377,7 +385,7 @@ function startVoiceRecording() {
             if (questionInput) {
                 questionInput.value = transcript;
             }
-            showNotification('Voice input received', 'success');
+            // Voice input received - no notification needed
         };
         
         // Handle errors
@@ -387,25 +395,25 @@ function startVoiceRecording() {
             
             switch(event.error) {
                 case 'no-speech':
-                    errorMessage = 'No speech detected. Please try again.';
+                    errorMessage = 'No speech detected.';
                     break;
                 case 'audio-capture':
-                    errorMessage = 'No microphone found. Please check your microphone connection.';
+                    errorMessage = 'Microphone not found.';
                     break;
                 case 'not-allowed':
-                    errorMessage = 'Microphone access denied. Please allow microphone access in Chrome settings or try refreshing the page.';
+                    errorMessage = 'Microphone access denied.';
                     break;
                 case 'network':
-                    errorMessage = 'Network error. Please check your internet connection.';
+                    errorMessage = 'Network error.';
                     break;
                 case 'service-not-allowed':
-                    errorMessage = 'Speech service not allowed. Please check Chrome permissions.';
+                    errorMessage = 'Speech service not allowed.';
                     break;
                 case 'bad-grammar':
-                    errorMessage = 'Speech recognition grammar error. Please try again.';
+                    errorMessage = 'Speech recognition error.';
                     break;
                 default:
-                    errorMessage = `Voice recognition error: ${event.error}. Please try again.`;
+                    errorMessage = 'Voice recognition failed.';
                     break;
             }
             
@@ -420,10 +428,10 @@ function startVoiceRecording() {
         
         // Start recognition
         recognition.start();
-        
-    } catch (error) {
+
+        } catch (error) {
         console.error('Voice recording setup failed:', error);
-        showNotification('Voice recording failed to start', 'error');
+        showNotification('Voice recording failed', 'error');
         isRecording = false;
         updateVoiceButton();
     }
@@ -453,8 +461,8 @@ function updateVoiceButton() {
             voiceButton.disabled = false;
         } else {
             voiceButton.innerHTML = '🎤 Voice';
-            voiceButton.style.backgroundColor = '';
-            voiceButton.style.color = '';
+            voiceButton.style.backgroundColor = 'transparent';
+            voiceButton.style.color = '#6b7280';
             voiceButton.disabled = false;
         }
     }
@@ -469,12 +477,12 @@ async function checkBackendHealth() {
         const data = await response.json();
         
         if (data.success) {
-            showNotification('Connected to backend', 'success');
+            // Backend connected - no notification needed
         } else {
             throw new Error('Backend health check failed');
         }
     } catch (error) {
-        showNotification('Cannot connect to backend', 'error');
+        showNotification('Backend connection failed', 'error');
     }
 }
 
@@ -486,7 +494,15 @@ function setLoading(loading) {
     
     if (askButton) {
         askButton.disabled = loading;
-        askButton.textContent = loading ? 'Processing...' : 'Ask AI';
+        // Keep the original SVG icon always
+        askButton.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        `;
+        askButton.style.backgroundColor = '#667eea';
+        askButton.style.color = 'white';
     }
     
     if (loading) {
@@ -501,18 +517,181 @@ function setLoading(loading) {
  * Show response
  */
 function showResponse(response) {
-    if (responseContent) {
-        responseContent.innerHTML = response;
-        responseContent.style.display = 'block';
+    // Add user message
+    addMessage(currentQuestion, 'user');
+    
+    // Add AI response with a small delay to prevent overlapping
+    setTimeout(() => {
+        addMessage(response, 'ai');
+    }, 100);
+    
+    // Clear input
+    if (questionInput) {
+        questionInput.value = '';
+        autoResizeTextarea();
     }
+    
+    // Save to history
+    saveToHistory(currentQuestion, response);
 }
 
 /**
  * Hide response
  */
 function hideResponse() {
-    if (responseContent) {
-        responseContent.style.display = 'none';
+    // Not needed in new chat interface
+}
+
+/**
+ * Add message to chat
+ */
+function addMessage(content, sender) {
+    if (!messagesContainer) return;
+    
+    console.log('Adding message:', sender, content);
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `${sender}-message`;
+    
+    const avatar = document.createElement('div');
+    avatar.className = `message-avatar ${sender}-avatar`;
+    
+    console.log('Avatar class:', avatar.className);
+    
+    if (sender === 'user') {
+        avatar.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        `;
+    } else {
+        avatar.innerHTML = `
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+        `;
+    }
+    
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.innerHTML = formatMessage(content);
+    
+    messageDiv.appendChild(avatar);
+    messageDiv.appendChild(messageContent);
+    
+    messagesContainer.appendChild(messageDiv);
+    
+    // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+/**
+ * Format message content
+ */
+function formatMessage(content) {
+    // Basic formatting for code blocks and links
+    let formatted = content
+        .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
+    
+    return formatted;
+}
+
+/**
+ * Auto-resize textarea
+ */
+function autoResizeTextarea() {
+    if (questionInput) {
+        questionInput.style.height = 'auto';
+        questionInput.style.height = Math.min(questionInput.scrollHeight, 120) + 'px';
+    }
+}
+
+/**
+ * Handle history toggle
+ */
+function handleHistoryToggle() {
+    const historyPanel = document.getElementById('historyPanel');
+    if (historyPanel) {
+        const isVisible = historyPanel.style.display !== 'none';
+        historyPanel.style.display = isVisible ? 'none' : 'flex';
+        
+        if (!isVisible) {
+            loadHistory();
+        }
+    }
+}
+
+/**
+ * Handle clear history
+ */
+function handleClearHistory() {
+    if (confirm('Are you sure you want to clear all conversation history?')) {
+        localStorage.removeItem('chatHistory');
+        loadHistory();
+    }
+}
+
+/**
+ * Save to history
+ */
+function saveToHistory(question, response) {
+    const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+    history.push({
+        question,
+        response,
+        timestamp: new Date().toISOString()
+    });
+    
+    // Keep only last 50 conversations
+    if (history.length > 50) {
+        history.splice(0, history.length - 50);
+    }
+    
+    localStorage.setItem('chatHistory', JSON.stringify(history));
+}
+
+/**
+ * Load history
+ */
+function loadHistory() {
+    const historyList = document.getElementById('historyList');
+    if (!historyList) return;
+    
+    const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+    
+    if (history.length === 0) {
+        historyList.innerHTML = '<div class="no-history">No conversations yet</div>';
+            return;
+        }
+        
+    historyList.innerHTML = history
+        .reverse()
+        .map(item => `
+            <div class="history-item" onclick="loadFromHistory('${item.question.replace(/'/g, "\\'")}')">
+                <div class="history-question">${item.question}</div>
+                <div class="history-time">${new Date(item.timestamp).toLocaleDateString()}</div>
+            </div>
+        `).join('');
+}
+
+/**
+ * Load from history
+ */
+function loadFromHistory(question) {
+    if (questionInput) {
+        questionInput.value = question;
+        autoResizeTextarea();
+    }
+    
+    // Hide history panel
+    const historyPanel = document.getElementById('historyPanel');
+    if (historyPanel) {
+        historyPanel.style.display = 'none';
     }
 }
 
@@ -545,7 +724,7 @@ function showNotification(message, type = 'info') {
         
         setTimeout(() => {
             notification.style.display = 'none';
-        }, 3000);
+        }, 2000);
     }
 }
 

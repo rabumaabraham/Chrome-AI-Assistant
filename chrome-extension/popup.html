@@ -11,69 +11,96 @@
         <!-- Header -->
         <header class="header">
             <div class="logo">
-                <span class="icon">🤖</span>
-                <h1>AI Assistant</h1>
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <span class="title">AI Assistant</span>
             </div>
             <div class="header-actions">
-                <button id="settingsBtn" class="icon-btn" title="Settings">⚙️</button>
-                <button id="historyBtn" class="icon-btn" title="History">📝</button>
+                <button id="historyBtn" class="header-btn" title="View History">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 12C3 7.03 7.03 3 12 3S21 7.03 21 12 16.97 21 12 21 3 16.97 3 12Z" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="main">
-            <!-- Question Input -->
-            <div class="input-section">
-                <div class="input-group">
-                    <textarea 
-                        id="questionInput" 
-                        placeholder="Ask me anything about this page..."
-                        rows="3"
-                    ></textarea>
-                    <div class="input-actions">
-                        <button id="voiceBtn" class="voice-btn" title="Voice Input (Ctrl+Shift+V)">🎤 Voice</button>
-                        <button id="askBtn" class="ask-btn" title="Ask AI (Ctrl+Enter)">Ask AI</button>
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <!-- Messages Area -->
+            <div id="messagesContainer" class="messages-container">
+                <div class="welcome-message">
+                    <div class="message-avatar ai-avatar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="message-content welcome-content">
+                        <p>Hi! I'm your AI assistant. Ask me anything about the current webpage, PDF, or images.</p>
                     </div>
                 </div>
             </div>
 
             <!-- Loading Indicator -->
-            <div id="loading" class="loading" style="display: none;">
-                <div class="spinner"></div>
-                <span>Processing...</span>
+            <div id="loading" class="loading-indicator" style="display: none;">
+                <div class="message-content loading-content">
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <p>AI is thinking...</p>
+                </div>
             </div>
+        </div>
 
-            <!-- Response Section -->
-            <div id="responseContent" class="response-content" style="display: none;"></div>
-
-            <!-- History Panel -->
-            <div id="historyList" class="history-panel" style="display: none;">
-                <h3>Recent Questions</h3>
-                <div class="history-items"></div>
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="questionInput" 
+                        placeholder="Ask me anything about this page..."
+                        rows="1"
+                    ></textarea>
+                    <div class="input-actions">
+                        <button id="voiceBtn" class="action-btn voice-btn" title="Voice Input (Ctrl+Shift+V)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 1C10.34 1 9 2.34 9 4V12C9 13.66 10.34 15 12 15S15 13.66 15 12V4C15 2.34 13.66 1 12 1Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M19 10V12C19 15.87 15.87 19 12 19S5 15.87 5 12V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M12 19V23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M8 23H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                        <button id="askBtn" class="action-btn send-btn" title="Send (Ctrl+Enter)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <!-- Settings Panel -->
-            <div id="settingsPanel" class="settings-panel" style="display: none;">
-                <h3>Settings</h3>
-                <!-- Settings content will be populated by JavaScript -->
+        <!-- History Panel -->
+        <div id="historyPanel" class="history-panel" style="display: none;">
+            <div class="history-header">
+                <h3>Recent Conversations</h3>
+                <button id="clearHistoryBtn" class="clear-history-btn">Clear All</button>
             </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-actions">
-                <button id="clearBtn" class="clear-btn">Clear</button>
-            </div>
-            <div class="footer-info">
-                <span class="status" id="status">Ready</span>
-            </div>
-        </footer>
-
-        <!-- Notification -->
-        <div id="notification" class="notification" style="display: none;"></div>
+            <div id="historyList" class="history-list"></div>
+        </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Notification Element -->
+    <div id="notification" class="notification" style="display: none;"></div>
+
     <script src="popup.js"></script>
 </body>
 </html>
