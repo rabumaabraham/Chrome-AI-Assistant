@@ -77,9 +77,9 @@ async function handleAskQuestion() {
     const question = questionInput?.value?.trim();
     if (!question) {
         showNotification('Please enter a question', 'warning');
-        return;
-    }
-    
+            return;
+        }
+        
     // Processing question
     
     try {
@@ -142,6 +142,37 @@ async function extractPageContent(tab) {
         });
         
         const content = results[0]?.result || {};
+        
+        // Process images with OCR if there are any
+        console.log('Found images for OCR:', content.images?.length || 0);
+        if (content.images && content.images.length > 0) {
+            console.log('Processing images with OCR...');
+            console.log('Images to process:', content.images.map(img => ({
+                src: img.src?.substring(0, 50) || 'NO_SRC',
+                dimensions: `${img.displayWidth}x${img.displayHeight}`,
+                testId: img.dataTestId
+            })));
+            
+            const ocrResults = await processImagesWithOCR(content.images);
+            console.log('OCR results:', ocrResults.length);
+            if (ocrResults.length > 0) {
+                content.ocrText = ocrResults.join('\n\n');
+                // Add OCR text to the main text content
+                content.textContent = (content.textContent || '') + '\n\n' + content.ocrText;
+                content.visibleText = (content.visibleText || '') + '\n\n' + content.ocrText;
+                console.log('Added OCR text to content:', content.ocrText);
+            } else {
+                console.log('No OCR text extracted from any images');
+            }
+        } else {
+            console.log('No images found for OCR processing');
+            // Special handling for Twitter/X - try to find images in a different way
+            if (tab.url && tab.url.includes('x.com') || tab.url.includes('twitter.com')) {
+                console.log('Twitter/X detected - attempting alternative image detection...');
+                // This will be handled by the enhanced selectors above
+            }
+        }
+        
         return {
             url: tab.url,
             title: tab.title,
@@ -157,6 +188,72 @@ async function extractPageContent(tab) {
             isPdfViewer: false
         };
     }
+}
+
+/**
+ * Process images with OCR
+ */
+async function processImagesWithOCR(images) {
+    const ocrResults = [];
+    
+    console.log('Processing', images.length, 'images for OCR');
+    
+    for (const image of images) {
+        try {
+            console.log('Processing image:', image.src.substring(0, 100), 'Dimensions:', image.width, 'x', image.height);
+            
+            // Only process visible images that might contain text
+            if (!image.isVisible) {
+                console.log('Skipping invisible image');
+                continue;
+            }
+            
+            // More lenient size requirements
+            if (image.displayWidth < 50 || image.displayHeight < 50) {
+                console.log('Skipping small image:', image.displayWidth, 'x', image.displayHeight);
+                continue;
+            }
+            
+            // Fetch the image
+            console.log('Fetching image...');
+            const response = await fetch(image.src);
+            const blob = await response.blob();
+            const imageData = await blobToDataURL(blob);
+            
+            console.log('Sending to OCR API...');
+            // Send to OCR API
+            const ocrResponse = await fetch(`${CONFIG.backendUrl}/ocr`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    imageData: imageData,
+                    imageInfo: {
+                        src: image.src,
+                        width: image.width,
+                        height: image.height
+                    }
+                })
+            });
+            
+            const ocrData = await ocrResponse.json();
+            console.log('OCR response:', ocrData);
+            
+            if (ocrData.success && ocrData.text && ocrData.text.trim().length > 0) {
+                ocrResults.push(`Image text: ${ocrData.text.trim()}`);
+                console.log('OCR success:', ocrData.text.trim());
+            } else {
+                console.log('OCR failed or no text:', ocrData.error || 'No text extracted');
+            }
+            
+        } catch (error) {
+            console.error('OCR processing failed for image:', image.src, error);
+        }
+    }
+    
+    console.log('OCR processing complete. Results:', ocrResults.length);
+    return ocrResults;
 }
 
 /**
@@ -197,17 +294,17 @@ async function extractPDFFromURL(url) {
 async function askAI(question, context) {
     try {
         const response = await fetch(`${CONFIG.backendUrl}/ask-ai`, {
-            method: 'POST',
-            headers: {
+                method: 'POST',
+                headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
+                },
+                body: JSON.stringify({
                 question: question,
                 context: context,
                 url: context.url
-            })
-        });
-        
+                })
+            });
+
         const data = await response.json();
         return data;
         
@@ -349,17 +446,61 @@ function extractPageContentInTab() {
         };
 
         const extractImages = () => {
-            return Array.from(document.querySelectorAll('img'))
-                .map(img => ({
-                    src: img.src,
-                    alt: img.alt,
-                    title: img.title,
-                    width: img.width,
-                    height: img.height,
-                    nearbyText: img.parentElement?.textContent?.substring(0, 200) || '',
-                    isVisible: img.offsetWidth > 0 && img.offsetHeight > 0
-                }))
-                .filter(img => img.src);
+            // Enhanced selectors for social media and various platforms
+            const selectors = [
+                'img', 'picture img', '[role="img"]', '.image', '.photo', '.media',
+                // Twitter/X specific
+                '[data-testid="tweetPhoto"] img', '[data-testid="tweetPhoto"]',
+                '[data-testid="tweet"] img', '[data-testid="tweet"] picture img',
+                // Generic social media
+                '.tweet img', '.post img', '.media-container img',
+                '.image-container img', '.photo-container img',
+                // Instagram, Facebook, etc.
+                '[data-testid*="image"]', '[data-testid*="photo"]',
+                '[aria-label*="image"]', '[aria-label*="photo"]'
+            ];
+            
+            const allImages = Array.from(document.querySelectorAll(selectors.join(', ')));
+            
+            console.log('Total images found:', allImages.length);
+            
+            return allImages
+                .map(img => {
+                    // Get actual rendered dimensions
+                    const rect = img.getBoundingClientRect();
+                    const style = window.getComputedStyle(img);
+                    
+                    const imageData = {
+                        src: img.src || img.getAttribute('data-src') || img.getAttribute('data-lazy') || img.getAttribute('data-original'),
+                        alt: img.alt,
+                        title: img.title,
+                        width: img.naturalWidth || img.width || rect.width,
+                        height: img.naturalHeight || img.height || rect.height,
+                        nearbyText: img.parentElement?.textContent?.substring(0, 200) || '',
+                        isVisible: img.offsetWidth > 0 && img.offsetHeight > 0 && style.display !== 'none' && style.visibility !== 'hidden',
+                        displayWidth: rect.width,
+                        displayHeight: rect.height,
+                        tagName: img.tagName,
+                        className: img.className,
+                        id: img.id,
+                        dataTestId: img.getAttribute('data-testid')
+                    };
+                    
+                    // Debug info
+                    console.log('Processing image:', {
+                        src: imageData.src?.substring(0, 100) || 'NO_SRC',
+                        dimensions: `${imageData.displayWidth}x${imageData.displayHeight}`,
+                        visible: imageData.isVisible,
+                        testId: imageData.dataTestId,
+                        className: imageData.className
+                    });
+                    
+                    return imageData;
+                })
+                .filter(img => img.src && (img.src.startsWith('http') || img.src.startsWith('data:')))
+                .filter(img => img.isVisible)
+                .filter(img => img.displayWidth > 30 && img.displayHeight > 30) // Even lower threshold
+                .sort((a, b) => (b.displayWidth * b.displayHeight) - (a.displayWidth * a.displayHeight)); // Sort by size, largest first
         };
 
         const isPDFViewer = () => {
@@ -404,39 +545,46 @@ function extractPageContentInTab() {
         };
 
         const extractTextContent = () => {
-            const bodyText = document.body.innerText || document.body.textContent || '';
-            return bodyText.trim();
+            // Get all text from body - this should capture everything
+            return document.body.innerText || document.body.textContent || '';
         };
 
         const extractVisibleText = () => {
-            const walker = document.createTreeWalker(
-                document.body,
-                NodeFilter.SHOW_TEXT,
-                {
-                    acceptNode: (node) => {
-                        const parent = node.parentElement;
-                        if (!parent) return NodeFilter.FILTER_REJECT;
-                        
-                        const style = window.getComputedStyle(parent);
-                        if (style.display === 'none' || style.visibility === 'hidden') {
-                            return NodeFilter.FILTER_REJECT;
-                        }
-                        
-                        return NodeFilter.FILTER_ACCEPT;
-                    }
-                }
-            );
+            // Simple approach: get all text from visible elements
+            let allText = '';
             
-            let visibleText = '';
-            let node;
-            while (node = walker.nextNode()) {
-                const text = node.textContent.trim();
-                if (text.length > 0) {
-                    visibleText += text + ' ';
+            // Try different methods to get comprehensive text
+            const methods = [
+                () => document.body.innerText,
+                () => document.body.textContent,
+                () => {
+                    // Get text from all visible elements
+                    const elements = document.querySelectorAll('*');
+                    let text = '';
+                    for (const el of elements) {
+                        if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+                            const elText = el.innerText || el.textContent || '';
+                            if (elText.trim().length > 0) {
+                                text += elText.trim() + ' ';
+                            }
+                        }
+                    }
+                    return text;
+                }
+            ];
+            
+            for (const method of methods) {
+                try {
+                    const text = method().trim();
+                    if (text.length > allText.length) {
+                        allText = text;
+                    }
+                } catch (e) {
+                    // Continue with next method
                 }
             }
             
-            return visibleText.trim();
+            return allText;
         };
 
         const isPdf = isPDFViewer();
@@ -445,14 +593,51 @@ function extractPageContentInTab() {
         const visibleText = extractVisibleText();
         const headings = extractHeadings();
         const images = extractImages();
+        
+        // Additional fallback: try to capture canvas elements that might contain images
+        const extractCanvasImages = () => {
+            const canvases = Array.from(document.querySelectorAll('canvas'));
+            const canvasImages = [];
+            
+            canvases.forEach(canvas => {
+                try {
+                    if (canvas.width > 100 && canvas.height > 100) {
+                        const dataURL = canvas.toDataURL('image/png');
+                        canvasImages.push({
+                            src: dataURL,
+                            alt: 'Canvas content',
+                            width: canvas.width,
+                            height: canvas.height,
+                            isVisible: true,
+                            displayWidth: canvas.offsetWidth,
+                            displayHeight: canvas.offsetHeight,
+                            tagName: 'CANVAS',
+                            isCanvas: true
+                        });
+                        console.log('Found canvas image:', canvas.width, 'x', canvas.height);
+                    }
+                } catch (e) {
+                    console.log('Canvas extraction failed:', e.message);
+                }
+            });
+            
+            return canvasImages;
+        };
+        
+        const canvasImages = extractCanvasImages();
+        const allImages = [...images, ...canvasImages];
+
+        // Use the most comprehensive text available
+        const bestTextContent = pdfContent || visibleText || textContent;
+        const bestVisibleText = pdfContent || visibleText || textContent;
 
         return {
             url: window.location.href,
             title: document.title,
-            textContent: pdfContent || textContent,
-            visibleText: pdfContent || visibleText,
+            textContent: bestTextContent,
+            visibleText: bestVisibleText,
             headings: headings,
-            images: images,
+            images: allImages,
             isPdfViewer: isPdf,
             currentPdfContent: pdfContent
         };
