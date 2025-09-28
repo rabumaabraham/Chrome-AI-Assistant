@@ -134,3 +134,16 @@ credentials.json
 # Backup files
 *.bak
 *.backup
+
+# Uploads and temp files
+uploads/
+temp/
+public/uploads/
+
+# PM2 logs
+.pm2/
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
