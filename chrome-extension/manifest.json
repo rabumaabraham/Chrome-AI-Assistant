@@ -47,11 +47,7 @@
     {
       "resources": [
         "popup.html", 
-        "icons/*",
-        "src/**/*",
-        "debug-test.js",
-        "content-simple.js",
-        "popup-simple.js"
+        "icons/*"
       ],
       "matches": ["<all_urls>"]
     }
