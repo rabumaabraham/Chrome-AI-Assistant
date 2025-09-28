@@ -87,38 +87,6 @@ class OCRService {
     }
 
     /**
-     * Process multiple images
-     */
-    async extractTextFromImages(images) {
-        const results = [];
-        const validImages = images.filter(img => this.isValidImage(img)).slice(0, config.ocr.maxImagesPerRequest);
-
-        for (const image of validImages) {
-            try {
-                const result = await this.extractText(image.imageData, image.options || {});
-                results.push({
-                    ...image,
-                    ...result
-                });
-            } catch (error) {
-                this.serviceLogger.warn('OCR failed for image', {
-                    src: image.src,
-                    error: error.message
-                });
-                results.push({
-                    ...image,
-                    success: false,
-                    error: error.message,
-                    text: '',
-                    confidence: 0
-                });
-            }
-        }
-
-        return results;
-    }
-
-    /**
      * Preprocess image for better OCR results
      */
     async preprocessImage(imageBuffer, options = {}) {

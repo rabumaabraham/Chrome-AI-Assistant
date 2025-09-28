@@ -4,7 +4,6 @@
  */
 
 const express = require('express');
-const { authenticateRequest, optionalAuth } = require('../middleware/auth.js');
 const { validateRequest } = require('../middleware/validation.js');
 
 // Controllers
@@ -55,15 +54,6 @@ const schemas = {
         }
     },
     
-    ocrBatch: {
-        images: {
-            type: 'array',
-            required: true,
-            minItems: 1,
-            maxItems: 10
-        }
-    },
-    
     pdf: {
         pdfData: {
             type: 'string',
@@ -83,7 +73,6 @@ router.get('/ai/health', AIController.healthCheck.bind(AIController));
 
 // OCR Routes
 router.post('/ocr', validateRequest(schemas.ocr), OCRController.extractText.bind(OCRController));
-router.post('/ocr/batch', validateRequest(schemas.ocrBatch), OCRController.extractTextBatch.bind(OCRController));
 router.get('/ocr/health', OCRController.healthCheck.bind(OCRController));
 
 // PDF Routes

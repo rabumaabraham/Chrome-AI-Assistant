@@ -68,56 +68,6 @@ class OCRController {
     }
 
     /**
-     * Handle batch OCR request for multiple images
-     */
-    async extractTextBatch(req, res) {
-        try {
-            const { images } = req.body;
-
-            if (!images || !Array.isArray(images) || images.length === 0) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Images array is required and must not be empty'
-                });
-            }
-
-            this.serviceLogger.info('Batch OCR request received', {
-                imageCount: images.length
-            });
-
-            const results = await OCRService.extractTextFromImages(images);
-
-            this.serviceLogger.info('Batch OCR completed', {
-                totalImages: images.length,
-                successfulExtractions: results.filter(r => r.success).length,
-                failedExtractions: results.filter(r => !r.success).length
-            });
-
-            return res.json({
-                success: true,
-                results: results,
-                summary: {
-                    total: results.length,
-                    successful: results.filter(r => r.success).length,
-                    failed: results.filter(r => !r.success).length
-                }
-            });
-
-        } catch (error) {
-            this.serviceLogger.error('Batch OCR controller error', {
-                error: error.message,
-                stack: error.stack
-            });
-
-            return res.status(500).json({
-                success: false,
-                error: 'Internal server error',
-                details: error.message
-            });
-        }
-    }
-
-    /**
      * Health check for OCR service
      */
     async healthCheck(req, res) {
