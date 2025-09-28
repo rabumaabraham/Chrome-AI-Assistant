@@ -3,32 +3,8 @@
  * Styles for injected elements and floating UI components
  */
 
-/* Floating Button */
-.ai-assistant-floating-btn {
-    position: fixed;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 10000;
-    transition: all 0.3s ease;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    user-select: none;
-}
-
-.ai-assistant-floating-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-}
-
-.ai-assistant-floating-btn:active {
-    transform: translateY(0);
-}
+/* Floating Button - REMOVED */
+/* All floating button styles have been removed */
 
 /* AI Response Injection */
 .ai-assistant-response {
