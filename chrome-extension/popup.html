@@ -21,10 +21,17 @@
                 <span class="title">AI Assistant</span>
             </div>
             <div class="header-actions">
-                <button id="historyBtn" class="header-btn" title="View History">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 12C3 7.03 7.03 3 12 3S21 7.03 21 12 16.97 21 12 21 3 16.97 3 12Z" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <button id="themeToggle" class="header-btn" title="Toggle Light/Dark Mode">
+                    <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 1V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M12 21V23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M4.22 4.22L5.64 5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M18.36 18.36L19.78 19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M1 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M21 12H23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M4.22 19.78L5.64 18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                     </svg>
                 </button>
             </div>
@@ -35,11 +42,6 @@
             <!-- Messages Area -->
             <div id="messagesContainer" class="messages-container">
                 <div class="welcome-message">
-                    <div class="message-avatar ai-avatar">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
                     <div class="message-content welcome-content">
                         <p>Hi! I'm your AI assistant. Ask me anything about the current webpage, PDF, or images.</p>
                     </div>
@@ -88,14 +90,6 @@
             </div>
         </div>
 
-        <!-- History Panel -->
-        <div id="historyPanel" class="history-panel" style="display: none;">
-            <div class="history-header">
-                <h3>Recent Conversations</h3>
-                <button id="clearHistoryBtn" class="clear-history-btn">Clear All</button>
-            </div>
-            <div id="historyList" class="history-list"></div>
-        </div>
     </div>
 
     <!-- Notification Element -->

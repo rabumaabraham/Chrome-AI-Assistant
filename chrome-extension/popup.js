@@ -18,7 +18,10 @@ let isRecording = false;
 let recognition = null;
 
 // DOM Elements
-let questionInput, askButton, voiceButton, historyButton, clearHistoryButton, messagesContainer, loading, notification;
+let questionInput, askButton, voiceButton, themeToggle, themeIcon, messagesContainer, loading, notification;
+
+// Theme state
+let isDarkMode = false;
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
@@ -34,8 +37,8 @@ function initializeElements() {
     questionInput = document.getElementById('questionInput');
     askButton = document.getElementById('askBtn');
     voiceButton = document.getElementById('voiceBtn');
-    historyButton = document.getElementById('historyBtn');
-    clearHistoryButton = document.getElementById('clearHistoryBtn');
+    themeToggle = document.getElementById('themeToggle');
+    themeIcon = document.getElementById('themeIcon');
     messagesContainer = document.getElementById('messagesContainer');
     loading = document.getElementById('loading');
     notification = document.getElementById('notification');
@@ -44,6 +47,9 @@ function initializeElements() {
     if (questionInput) {
         questionInput.addEventListener('input', autoResizeTextarea);
     }
+    
+    // Load saved theme
+    loadTheme();
 }
 
 /**
@@ -71,12 +77,8 @@ function setupEventListeners() {
             }
         });
     
-    if (historyButton) {
-        historyButton.addEventListener('click', handleHistoryToggle);
-    }
-    
-    if (clearHistoryButton) {
-        clearHistoryButton.addEventListener('click', handleClearHistory);
+    if (themeToggle) {
+        themeToggle.addEventListener('click', handleThemeToggle);
     }
     
     if (voiceButton) {
@@ -424,6 +426,12 @@ function startVoiceRecording() {
         // Handle end
         recognition.onend = () => {
             stopVoiceRecording();
+            // Auto-send the question if there's text in the input
+            if (questionInput && questionInput.value.trim()) {
+                setTimeout(() => {
+                    handleAskQuestion();
+                }, 500); // Small delay to ensure UI updates
+            }
         };
         
         // Start recognition
@@ -455,12 +463,20 @@ function stopVoiceRecording() {
 function updateVoiceButton() {
     if (voiceButton) {
         if (isRecording) {
-            voiceButton.innerHTML = '🔴 Stop';
+            voiceButton.innerHTML = '🔴 Stop & Send';
             voiceButton.style.backgroundColor = '#dc3545';
             voiceButton.style.color = 'white';
             voiceButton.disabled = false;
         } else {
-            voiceButton.innerHTML = '🎤 Voice';
+            // Keep the original microphone SVG icon
+            voiceButton.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 1C10.3431 1 9 2.34315 9 4V10C9 11.6569 10.3431 13 12 13C13.6569 13 15 11.6569 15 10V4C15 2.34315 13.6569 1 12 1Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19 10V12C19 15.87 15.87 19 12 19S5 15.87 5 12V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M12 19V23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M8 23H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            `;
             voiceButton.style.backgroundColor = 'transparent';
             voiceButton.style.color = '#6b7280';
             voiceButton.disabled = false;
@@ -531,8 +547,6 @@ function showResponse(response) {
         autoResizeTextarea();
     }
     
-    // Save to history
-    saveToHistory(currentQuestion, response);
 }
 
 /**
@@ -553,31 +567,10 @@ function addMessage(content, sender) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `${sender}-message`;
     
-    const avatar = document.createElement('div');
-    avatar.className = `message-avatar ${sender}-avatar`;
-    
-    console.log('Avatar class:', avatar.className);
-    
-    if (sender === 'user') {
-        avatar.innerHTML = `
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        `;
-    } else {
-        avatar.innerHTML = `
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            </svg>
-        `;
-    }
-    
     const messageContent = document.createElement('div');
     messageContent.className = 'message-content';
     messageContent.innerHTML = formatMessage(content);
     
-    messageDiv.appendChild(avatar);
     messageDiv.appendChild(messageContent);
     
     messagesContainer.appendChild(messageDiv);
@@ -612,87 +605,63 @@ function autoResizeTextarea() {
 }
 
 /**
- * Handle history toggle
+ * Handle theme toggle
  */
-function handleHistoryToggle() {
-    const historyPanel = document.getElementById('historyPanel');
-    if (historyPanel) {
-        const isVisible = historyPanel.style.display !== 'none';
-        historyPanel.style.display = isVisible ? 'none' : 'flex';
-        
-        if (!isVisible) {
-            loadHistory();
+function handleThemeToggle() {
+    isDarkMode = !isDarkMode;
+    applyTheme();
+    saveTheme();
+}
+
+/**
+ * Apply theme
+ */
+function applyTheme() {
+    const body = document.body;
+    
+    if (isDarkMode) {
+        body.classList.add('dark-theme');
+        // Update icon to moon
+        if (themeIcon) {
+            themeIcon.innerHTML = `
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            `;
+        }
+    } else {
+        body.classList.remove('dark-theme');
+        // Update icon to sun
+        if (themeIcon) {
+            themeIcon.innerHTML = `
+                <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 1V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 21V23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4.22 4.22L5.64 5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M18.36 18.36L19.78 19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M1 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M21 12H23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4.22 19.78L5.64 18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            `;
         }
     }
 }
 
 /**
- * Handle clear history
+ * Save theme to localStorage
  */
-function handleClearHistory() {
-    if (confirm('Are you sure you want to clear all conversation history?')) {
-        localStorage.removeItem('chatHistory');
-        loadHistory();
-    }
+function saveTheme() {
+    localStorage.setItem('isDarkMode', isDarkMode.toString());
 }
 
 /**
- * Save to history
+ * Load theme from localStorage
  */
-function saveToHistory(question, response) {
-    const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-    history.push({
-        question,
-        response,
-        timestamp: new Date().toISOString()
-    });
-    
-    // Keep only last 50 conversations
-    if (history.length > 50) {
-        history.splice(0, history.length - 50);
+function loadTheme() {
+    const savedTheme = localStorage.getItem('isDarkMode');
+    if (savedTheme !== null) {
+        isDarkMode = savedTheme === 'true';
     }
-    
-    localStorage.setItem('chatHistory', JSON.stringify(history));
-}
-
-/**
- * Load history
- */
-function loadHistory() {
-    const historyList = document.getElementById('historyList');
-    if (!historyList) return;
-    
-    const history = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-    
-    if (history.length === 0) {
-        historyList.innerHTML = '<div class="no-history">No conversations yet</div>';
-            return;
-        }
-        
-    historyList.innerHTML = history
-        .reverse()
-        .map(item => `
-            <div class="history-item" onclick="loadFromHistory('${item.question.replace(/'/g, "\\'")}')">
-                <div class="history-question">${item.question}</div>
-                <div class="history-time">${new Date(item.timestamp).toLocaleDateString()}</div>
-            </div>
-        `).join('');
-}
-
-/**
- * Load from history
- */
-function loadFromHistory(question) {
-    if (questionInput) {
-        questionInput.value = question;
-        autoResizeTextarea();
-    }
-    
-    // Hide history panel
-    const historyPanel = document.getElementById('historyPanel');
-    if (historyPanel) {
-        historyPanel.style.display = 'none';
-    }
+    applyTheme();
 }
 
 /**
