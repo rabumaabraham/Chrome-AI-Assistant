@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome AI Assistant Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .test-section h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+        .image-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .pdf-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .pdf-link:hover {
+            background-color: #0056b3;
+        }
+        .test-instructions {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🤖 Chrome AI Assistant Test Page</h1>
+    
+    <div class="test-instructions">
+        <h3>🧪 Test Instructions</h3>
+        <p>Use this page to test your Chrome AI Assistant extension. Try asking questions about:</p>
+        <ul>
+            <li><strong>Text Content:</strong> "What is this page about?"</li>
+            <li><strong>Tables:</strong> "What data is in the table?"</li>
+            <li><strong>Images:</strong> "What do you see in the images?"</li>
+            <li><strong>PDFs:</strong> "Tell me about the PDF document"</li>
+            <li><strong>General:</strong> "Summarize this page"</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Sample Text Content</h2>
+        <p>This is a comprehensive test page designed to evaluate the Chrome AI Assistant's ability to understand and analyze web content. The page contains various types of content including text, tables, images, and links to help test different features of the AI assistant.</p>
+        
+        <p>The AI assistant should be able to read this text content and answer questions about it. For example, you can ask "What is the main purpose of this page?" and the AI should be able to provide a meaningful response based on the content it can see.</p>
+        
+        <h3>Key Features to Test:</h3>
+        <ul>
+            <li>DOM content extraction</li>
+            <li>Text analysis and understanding</li>
+            <li>Table data interpretation</li>
+            <li>Image content recognition (OCR)</li>
+            <li>PDF document processing</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Sample Data Table</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Category</th>
+                    <th>In Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Laptop Computer</td>
+                    <td>$999.99</td>
+                    <td>Electronics</td>
+                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <td>Wireless Mouse</td>
+                    <td>$29.99</td>
+                    <td>Electronics</td>
+                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <td>Office Chair</td>
+                    <td>$199.99</td>
+                    <td>Furniture</td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <td>Coffee Mug</td>
+                    <td>$12.99</td>
+                    <td>Kitchen</td>
+                    <td>Yes</td>
+                </tr>
+            </tbody>
+        </table>
+        <p><em>Try asking: "What products are in stock?" or "What's the most expensive item?"</em></p>
+    </div>
+
+    <div class="test-section">
+        <h2>🖼️ Sample Images</h2>
+        <div class="image-container">
+            <img src="https://via.placeholder.com/300x200/4CAF50/FFFFFF?text=Sample+Image+1" 
+                 alt="Sample image showing a green rectangle with white text" 
+                 title="Test Image 1">
+            <p><em>Try asking: "What do you see in the images?" or "Describe the first image"</em></p>
+        </div>
+        
+        <div class="image-container">
+            <img src="https://via.placeholder.com/400x150/2196F3/FFFFFF?text=Another+Test+Image" 
+                 alt="Blue rectangle with white text saying Another Test Image" 
+                 title="Test Image 2">
+            <p><em>This image should be readable by OCR if the feature is working</em></p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📄 PDF Document Links</h2>
+        <p>Here are some sample PDF documents you can test with:</p>
+        <a href="https://rabumaabraham.github.io/Rabuma_Abraham_Bekele_CV.pdf" 
+           class="pdf-link" 
+           target="_blank">
+            📄 View Sample CV (PDF)
+        </a>
+        <p><em>Try asking: "Tell me about the CV" or "What's in the PDF document?" after opening the PDF</em></p>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 External Links</h2>
+        <p>Here are some external links to test link extraction:</p>
+        <ul>
+            <li><a href="https://www.google.com" target="_blank">Google Search</a></li>
+            <li><a href="https://www.github.com" target="_blank">GitHub</a></li>
+            <li><a href="https://www.stackoverflow.com" target="_blank">Stack Overflow</a></li>
+        </ul>
+        <p><em>Try asking: "What external links are on this page?"</em></p>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Test Checklist</h2>
+        <p>Use this checklist to verify all features are working:</p>
+        <ul>
+            <li>□ Extension loads without errors</li>
+            <li>□ Can ask questions about text content</li>
+            <li>□ Can analyze table data</li>
+            <li>□ Can process images with OCR</li>
+            <li>□ Can read PDF content</li>
+            <li>□ Voice input works (if supported)</li>
+            <li>□ History saves and displays correctly</li>
+            <li>□ Settings can be configured</li>
+        </ul>
+    </div>
+
+    <script>
+        // Add some dynamic content for testing
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test page loaded - ready for AI Assistant testing');
+            
+            // Add timestamp
+            const timestamp = new Date().toLocaleString();
+            const timestampDiv = document.createElement('div');
+            timestampDiv.innerHTML = `<p><strong>Page loaded at:</strong> ${timestamp}</p>`;
+            timestampDiv.style.marginTop = '20px';
+            timestampDiv.style.padding = '10px';
+            timestampDiv.style.backgroundColor = '#f0f0f0';
+            timestampDiv.style.borderRadius = '5px';
+            document.body.appendChild(timestampDiv);
+        });
+    </script>
+</body>
+</html>

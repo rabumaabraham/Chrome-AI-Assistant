@@ -1,17 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "AI Assistant",
+  "name": "Chrome AI Assistant",
   "version": "1.0.0",
-  "description": "AI-powered assistant that can answer questions about webpage content, PDFs, and images",
+  "description": "Professional AI-powered assistant for webpage content analysis, PDF reading, image OCR, and voice input",
   "permissions": [
     "activeTab",
     "storage",
     "scripting",
-    "tabs"
+    "tabs",
+    "contextMenus",
+    "clipboardWrite"
   ],
   "host_permissions": [
     "http://localhost:3000/*",
-    "https://your-backend-domain.com/*"
+    "https://rabumaabraham.github.io/*",
+    "https://openrouter.ai/*",
+    "https://*/*"
   ],
   "background": {
     "service_worker": "background.js"

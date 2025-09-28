@@ -1,19 +1,13 @@
-// Request Validation Middleware
-const winston = require('winston');
+/**
+ * Request Validation Middleware
+ * Centralized validation for all API endpoints
+ */
 
-const logger = winston.createLogger({
-    level: process.env.LOG_LEVEL || 'info',
-    format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-    ),
-    transports: [
-        new winston.transports.Console(),
-        new winston.transports.File({ filename: 'logs/validation.log' })
-    ]
-});
+const logger = require('../services/Logger.js');
 
-// Validation function factory
+/**
+ * Validation function factory
+ */
 function validateRequest(schema) {
     return (req, res, next) => {
         try {
@@ -52,24 +46,25 @@ function validateRequest(schema) {
                 
                 // String-specific validations
                 if (fieldSchema.type === 'string' && typeof value === 'string') {
-                    // Length validations
+                    // Minimum length
                     if (fieldSchema.minLength && value.length < fieldSchema.minLength) {
                         errors.push({
                             field: fieldName,
                             message: `${fieldName} must be at least ${fieldSchema.minLength} characters long`,
-                            code: 'MIN_LENGTH',
-                            minLength: fieldSchema.minLength,
-                            actualLength: value.length
+                            code: 'MIN_LENGTH_VIOLATION',
+                            expected: fieldSchema.minLength,
+                            actual: value.length
                         });
                     }
                     
+                    // Maximum length
                     if (fieldSchema.maxLength && value.length > fieldSchema.maxLength) {
                         errors.push({
                             field: fieldName,
                             message: `${fieldName} must be no more than ${fieldSchema.maxLength} characters long`,
-                            code: 'MAX_LENGTH',
-                            maxLength: fieldSchema.maxLength,
-                            actualLength: value.length
+                            code: 'MAX_LENGTH_VIOLATION',
+                            expected: fieldSchema.maxLength,
+                            actual: value.length
                         });
                     }
                     
@@ -78,7 +73,7 @@ function validateRequest(schema) {
                         errors.push({
                             field: fieldName,
                             message: `${fieldName} format is invalid`,
-                            code: 'INVALID_PATTERN',
+                            code: 'PATTERN_VIOLATION',
                             pattern: fieldSchema.pattern
                         });
                     }
@@ -101,51 +96,58 @@ function validateRequest(schema) {
                     }
                 }
                 
+                // Number-specific validations
+                if (fieldSchema.type === 'number' && typeof value === 'number') {
+                    if (fieldSchema.min !== undefined && value < fieldSchema.min) {
+                        errors.push({
+                            field: fieldName,
+                            message: `${fieldName} must be at least ${fieldSchema.min}`,
+                            code: 'MIN_VALUE_VIOLATION',
+                            expected: fieldSchema.min,
+                            actual: value
+                        });
+                    }
+                    
+                    if (fieldSchema.max !== undefined && value > fieldSchema.max) {
+                        errors.push({
+                            field: fieldName,
+                            message: `${fieldName} must be no more than ${fieldSchema.max}`,
+                            code: 'MAX_VALUE_VIOLATION',
+                            expected: fieldSchema.max,
+                            actual: value
+                        });
+                    }
+                }
+                
                 // Array-specific validations
                 if (fieldSchema.type === 'array' && Array.isArray(value)) {
                     if (fieldSchema.minItems && value.length < fieldSchema.minItems) {
                         errors.push({
                             field: fieldName,
-                            message: `${fieldName} must contain at least ${fieldSchema.minItems} items`,
-                            code: 'MIN_ITEMS',
-                            minItems: fieldSchema.minItems,
-                            actualItems: value.length
+                            message: `${fieldName} must have at least ${fieldSchema.minItems} items`,
+                            code: 'MIN_ITEMS_VIOLATION',
+                            expected: fieldSchema.minItems,
+                            actual: value.length
                         });
                     }
                     
                     if (fieldSchema.maxItems && value.length > fieldSchema.maxItems) {
                         errors.push({
                             field: fieldName,
-                            message: `${fieldName} must contain no more than ${fieldSchema.maxItems} items`,
-                            code: 'MAX_ITEMS',
-                            maxItems: fieldSchema.maxItems,
-                            actualItems: value.length
+                            message: `${fieldName} must have no more than ${fieldSchema.maxItems} items`,
+                            code: 'MAX_ITEMS_VIOLATION',
+                            expected: fieldSchema.maxItems,
+                            actual: value.length
                         });
-                    }
-                }
-                
-                // Object-specific validations
-                if (fieldSchema.type === 'object' && typeof value === 'object' && value !== null) {
-                    if (fieldSchema.requiredFields) {
-                        for (const requiredField of fieldSchema.requiredFields) {
-                            if (!(requiredField in value)) {
-                                errors.push({
-                                    field: `${fieldName}.${requiredField}`,
-                                    message: `${requiredField} is required in ${fieldName}`,
-                                    code: 'REQUIRED_OBJECT_FIELD'
-                                });
-                            }
-                        }
                     }
                 }
             }
             
             if (errors.length > 0) {
-                logger.warn('Validation failed', {
+                logger.getServiceLogger('Validation').warn('Request validation failed', {
                     errors: errors,
-                    body: sanitizeRequestBody(req.body),
-                    ip: req.ip,
-                    userAgent: req.get('User-Agent')
+                    url: req.url,
+                    method: req.method
                 });
                 
                 return res.status(400).json({
@@ -157,15 +159,13 @@ function validateRequest(schema) {
             }
             
             next();
-            
         } catch (error) {
-            logger.error('Validation middleware error:', {
+            logger.getServiceLogger('Validation').error('Validation middleware error', {
                 error: error.message,
-                stack: error.stack,
-                body: sanitizeRequestBody(req.body)
+                stack: error.stack
             });
             
-            res.status(500).json({
+            return res.status(500).json({
                 success: false,
                 error: 'Validation error',
                 message: 'Internal validation error'
@@ -174,7 +174,9 @@ function validateRequest(schema) {
     };
 }
 
-// Type validation helper
+/**
+ * Type validation helper
+ */
 function validateType(value, expectedType) {
     switch (expectedType) {
         case 'string':
@@ -183,20 +185,22 @@ function validateType(value, expectedType) {
             return typeof value === 'number' && !isNaN(value);
         case 'boolean':
             return typeof value === 'boolean';
-        case 'array':
-            return Array.isArray(value);
         case 'object':
             return typeof value === 'object' && value !== null && !Array.isArray(value);
-        case 'integer':
-            return Number.isInteger(value);
-        case 'float':
-            return typeof value === 'number' && !isNaN(value);
+        case 'array':
+            return Array.isArray(value);
+        case 'email':
+            return typeof value === 'string' && isValidEmail(value);
+        case 'url':
+            return typeof value === 'string' && isValidUrl(value);
         default:
-            return true; // Unknown types pass validation
+            return true;
     }
 }
 
-// URL validation helper
+/**
+ * URL validation helper
+ */
 function isValidUrl(string) {
     try {
         new URL(string);
@@ -206,54 +210,14 @@ function isValidUrl(string) {
     }
 }
 
-// Email validation helper
+/**
+ * Email validation helper
+ */
 function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 }
 
-// Sanitize request body for logging (remove sensitive data)
-function sanitizeRequestBody(body) {
-    const sensitiveFields = ['apiKey', 'password', 'token', 'secret', 'key'];
-    const sanitized = { ...body };
-    
-    for (const field of sensitiveFields) {
-        if (sanitized[field]) {
-            sanitized[field] = '[REDACTED]';
-        }
-    }
-    
-    return sanitized;
-}
-
-// Custom validation rules
-const customValidators = {
-    // Validate base64 data URL
-    isBase64DataUrl: (value, type) => {
-        if (typeof value !== 'string') return false;
-        const base64DataUrlRegex = /^data:([a-zA-Z][a-zA-Z0-9]*\/[a-zA-Z0-9][a-zA-Z0-9]*);base64,([A-Za-z0-9+/=]+)$/;
-        return base64DataUrlRegex.test(value);
-    },
-    
-    // Validate image data URL
-    isImageDataUrl: (value) => {
-        if (typeof value !== 'string') return false;
-        const imageDataUrlRegex = /^data:image\/(png|jpeg|jpg|gif|webp|bmp);base64,([A-Za-z0-9+/=]+)$/;
-        return imageDataUrlRegex.test(value);
-    },
-    
-    // Validate PDF data URL
-    isPdfDataUrl: (value) => {
-        if (typeof value !== 'string') return false;
-        const pdfDataUrlRegex = /^data:application\/pdf;base64,([A-Za-z0-9+/=]+)$/;
-        return pdfDataUrlRegex.test(value);
-    }
-};
-
-// Add custom validators to the validation function
-validateRequest.customValidators = customValidators;
-
 module.exports = {
-    validateRequest,
-    customValidators
+    validateRequest
 };

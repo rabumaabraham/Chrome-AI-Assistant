@@ -3,104 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Assistant</title>
+    <title>Chrome AI Assistant</title>
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
         <header class="header">
-            <h1>🤖 AI Assistant</h1>
-            <div class="theme-toggle">
-                <button id="themeToggle" class="theme-btn">🌙</button>
+            <div class="logo">
+                <span class="icon">🤖</span>
+                <h1>AI Assistant</h1>
+            </div>
+            <div class="header-actions">
+                <button id="settingsBtn" class="icon-btn" title="Settings">⚙️</button>
+                <button id="historyBtn" class="icon-btn" title="History">📝</button>
             </div>
         </header>
 
-        <div class="main-content">
-            <!-- Question Input Section -->
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Question Input -->
             <div class="input-section">
-                <div class="input-container">
+                <div class="input-group">
                     <textarea 
                         id="questionInput" 
                         placeholder="Ask me anything about this page..."
                         rows="3"
                     ></textarea>
-                    <div class="input-controls">
-                        <button id="voiceBtn" class="control-btn" title="Voice Input">
-                            🎤
-                        </button>
-                        <button id="screenshotBtn" class="control-btn" title="Screenshot & OCR">
-                            📷
-                        </button>
-                        <button id="uploadBtn" class="control-btn" title="Upload PDF/Image">
-                            📄
-                        </button>
-                        <button id="askBtn" class="ask-btn">Ask AI</button>
+                    <div class="input-actions">
+                        <button id="voiceBtn" class="voice-btn" title="Voice Input (Ctrl+Shift+V)">🎤 Voice</button>
+                        <button id="askBtn" class="ask-btn" title="Ask AI (Ctrl+Enter)">Ask AI</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Loading State -->
-            <div id="loadingState" class="loading hidden">
+            <!-- Loading Indicator -->
+            <div id="loading" class="loading" style="display: none;">
                 <div class="spinner"></div>
-                <p>AI is thinking...</p>
+                <span>Processing...</span>
             </div>
 
             <!-- Response Section -->
-            <div id="responseSection" class="response-section hidden">
-                <div class="response-header">
-                    <h3>AI Response</h3>
-                    <button id="copyBtn" class="control-btn" title="Copy Response">📋</button>
-                </div>
-                <div id="responseContent" class="response-content"></div>
+            <div id="responseContent" class="response-content" style="display: none;"></div>
+
+            <!-- History Panel -->
+            <div id="historyList" class="history-panel" style="display: none;">
+                <h3>Recent Questions</h3>
+                <div class="history-items"></div>
             </div>
 
-            <!-- History Section -->
-            <div id="historySection" class="history-section">
-                <div class="history-header">
-                    <h3>Recent Questions</h3>
-                    <button id="clearHistoryBtn" class="control-btn" title="Clear History">🗑️</button>
-                </div>
-                <div id="historyList" class="history-list"></div>
+            <!-- Settings Panel -->
+            <div id="settingsPanel" class="settings-panel" style="display: none;">
+                <h3>Settings</h3>
+                <!-- Settings content will be populated by JavaScript -->
             </div>
-        </div>
+        </main>
 
-        <!-- Settings Modal -->
-        <div id="settingsModal" class="modal hidden">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Settings</h3>
-                    <button id="closeSettings" class="close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="setting-item">
-                        <label for="backendUrl">Backend URL:</label>
-                        <input type="url" id="backendUrl" placeholder="http://localhost:3000">
-                    </div>
-                    <div class="setting-item">
-                        <label for="apiKey">API Key (optional):</label>
-                        <input type="password" id="apiKey" placeholder="Your OpenAI API key">
-                    </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="enableVoice"> Enable Voice Input
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="enableOCR"> Enable OCR Features
-                        </label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button id="saveSettings" class="save-btn">Save Settings</button>
-                </div>
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-actions">
+                <button id="clearBtn" class="clear-btn">Clear</button>
             </div>
-        </div>
+            <div class="footer-info">
+                <span class="status" id="status">Ready</span>
+            </div>
+        </footer>
+
+        <!-- Notification -->
+        <div id="notification" class="notification" style="display: none;"></div>
     </div>
 
-    <!-- Hidden file input for uploads -->
-    <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.gif,.bmp,.webp" style="display: none;">
-
-    <script src="popup.js"></script>
+    <!-- Scripts -->
+    <script type="module" src="src/popup.js"></script>
 </body>
 </html>

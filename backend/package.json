@@ -1,22 +1,30 @@
 {
   "name": "ai-assistant-backend",
   "version": "1.0.0",
-  "description": "Backend API for AI Assistant Chrome Extension",
-  "main": "index.js",
+  "description": "Backend API for AI Assistant Chrome Extension - Professional, Scalable Architecture",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "jest"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "lint": "eslint src/",
+    "build": "echo 'No build step required for Node.js'",
+    "clean": "rimraf logs/*.log",
+    "setup": "node setup.js"
   },
   "keywords": [
     "ai",
     "assistant",
     "chrome-extension",
-    "openai",
+    "openrouter",
     "ocr",
-    "pdf"
+    "pdf",
+    "tesseract",
+    "dom-parsing",
+    "voice-input",
+    "web-scraping"
   ],
-  "author": "Your Name",
+  "author": "Rabuma Abraham Bekele",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",

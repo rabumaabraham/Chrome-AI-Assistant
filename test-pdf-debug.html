@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .pdf-link {
+            display: inline-block;
+            padding: 15px 25px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .pdf-link:hover {
+            background-color: #0056b3;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 PDF Content Extraction Debug Test</h1>
+    
+    <div class="test-container">
+        <h2>📋 Testing Instructions</h2>
+        
+        <div class="step">
+            <h3>Step 1: Open PDF</h3>
+            <p>Click the link below to open your CV PDF:</p>
+            <a href="https://rabumaabraham.github.io/Rabuma_Abraham_Bekele_CV.pdf" 
+               class="pdf-link" 
+               target="_blank">
+                📄 Open Rabuma's CV PDF
+            </a>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Check Console</h3>
+            <p>After opening the PDF:</p>
+            <ol>
+                <li>Press <strong>F12</strong> to open Developer Tools</li>
+                <li>Go to the <strong>Console</strong> tab</li>
+                <li>Look for debug messages starting with "PDF Detection" and "PDF content extraction"</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Test Extension</h3>
+            <p>Once the PDF is loaded:</p>
+            <ol>
+                <li>Open the Chrome AI Assistant extension</li>
+                <li>Ask: <strong>"What is this document about?"</strong></li>
+                <li>Check if the AI responds with actual CV content</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Expected Debug Output</h3>
+            <p>You should see console messages like:</p>
+            <div class="debug-info">
+Checking if this is a PDF viewer...<br>
+URL: https://rabumaabraham.github.io/Rabuma_Abraham_Bekele_CV.pdf<br>
+PDF detected: URL contains .pdf<br>
+Attempting PDF content extraction...<br>
+Found PDF viewer element, extracting text...<br>
+PDF content extracted from viewer: 2847 characters<br>
+PDF Detection Result: true<br>
+PDF Content Extracted: 2847 characters<br>
+Final content object: {<br>
+&nbsp;&nbsp;url: "https://rabumaabraham.github.io/Rabuma_Abraham_Bekele_CV.pdf",<br>
+&nbsp;&nbsp;title: "Rabuma Abraham Bekele CV",<br>
+&nbsp;&nbsp;isPdfViewer: true,<br>
+&nbsp;&nbsp;pdfContentLength: 2847,<br>
+&nbsp;&nbsp;textContentLength: 2847,<br>
+&nbsp;&nbsp;targetedContentLength: 3000<br>
+}
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 5: Troubleshooting</h3>
+            <p>If you don't see the expected output:</p>
+            <ul>
+                <li>Make sure the extension is reloaded (go to chrome://extensions/ and click reload)</li>
+                <li>Check that the backend server is running</li>
+                <li>Try refreshing the PDF page</li>
+                <li>Check for any error messages in the console</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>🎯 Test Questions</h2>
+        <p>Try asking these questions after opening the PDF:</p>
+        <ul>
+            <li>"What is this document about?"</li>
+            <li>"Tell me about Rabuma's profession"</li>
+            <li>"What are his contact details?"</li>
+            <li>"What skills does he have?"</li>
+            <li>"What is his work experience?"</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('PDF Debug Test Page Loaded');
+        console.log('Current URL:', window.location.href);
+        
+        // Add timestamp
+        document.addEventListener('DOMContentLoaded', function() {
+            const timestamp = new Date().toLocaleString();
+            const timestampDiv = document.createElement('div');
+            timestampDiv.innerHTML = `<p><strong>Page loaded at:</strong> ${timestamp}</p>`;
+            timestampDiv.style.marginTop = '20px';
+            timestampDiv.style.padding = '10px';
+            timestampDiv.style.backgroundColor = '#e9ecef';
+            timestampDiv.style.borderRadius = '5px';
+            document.body.appendChild(timestampDiv);
+        });
+    </script>
+</body>
+</html>
