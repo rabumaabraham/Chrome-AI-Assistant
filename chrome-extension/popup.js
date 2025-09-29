@@ -1,10 +1,3 @@
-/**
- * Simple Popup Script
- * Working version without complex module imports
- */
-
-// Chrome AI Assistant Popup
-
 // Configuration
 const CONFIG = {
     backendUrl: 'https://chrome-ai-assistant.onrender.com/api',

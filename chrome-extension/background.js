@@ -1,8 +1,3 @@
-/**
- * Background Script for Chrome AI Assistant
- */
-
-// Basic context menu setup
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: 'ask-ai',

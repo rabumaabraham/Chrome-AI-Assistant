@@ -1,9 +1,3 @@
-/**
- * Chrome AI Assistant Content Script
- * Floating button completely removed
- */
-
-// Remove any existing floating buttons immediately
 function removeAllFloatingButtons() {
     // Remove by ID
     const existingBtn = document.getElementById('ai-assistant-floating-btn');

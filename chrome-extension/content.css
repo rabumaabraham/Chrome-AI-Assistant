@@ -1,12 +1,3 @@
-/**
- * Chrome AI Assistant - Content Script Styles
- * Styles for injected elements and floating UI components
- */
-
-/* Floating Button - REMOVED */
-/* All floating button styles have been removed */
-
-/* AI Response Injection */
 .ai-assistant-response {
     position: fixed;
     top: 50%;
