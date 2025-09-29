@@ -107,9 +107,19 @@ async function handleAskQuestion() {
         
     // Processing question
     
+    // First, add user message immediately
+    currentQuestion = question;
+    addMessage(currentQuestion, 'user');
+    
+    // Clear input immediately
+    if (questionInput) {
+        questionInput.value = '';
+        autoResizeTextarea();
+    }
+    
     try {
-        setLoading(true);
-        currentQuestion = question;
+        // Create AI message bubble with "AI is thinking..." immediately
+        const aiMessageId = addThinkingMessage();
         
         // Get current tab
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -121,16 +131,19 @@ async function handleAskQuestion() {
         const response = await askAI(question, pageContent);
         
         if (response.success) {
-            showResponse(response.answer);
-            // Response received - no notification needed
+            // Replace "AI is thinking..." with actual response
+            updateMessage(aiMessageId, response.answer);
         } else {
             throw new Error(response.error || 'AI request failed');
         }
         
     } catch (error) {
+        // If there's an error, remove the thinking message
+        const aiMessage = document.querySelector('.ai-message[data-thinking="true"]');
+        if (aiMessage) {
+            aiMessage.remove();
+        }
         showNotification(`Error: ${error.message}`, 'error');
-    } finally {
-        setLoading(false);
     }
 }
 
@@ -168,34 +181,42 @@ async function extractPageContent(tab) {
         
         const content = results[0]?.result || {};
         
-        // Process images with OCR if there are any
+        // Process images with OCR if there are any (limit to 3 images max for speed)
         console.log('Found images for OCR:', content.images?.length || 0);
         if (content.images && content.images.length > 0) {
             console.log('Processing images with OCR...');
-            console.log('Images to process:', content.images.map(img => ({
+            // Limit to first 3 images for faster processing
+            const imagesToProcess = content.images.slice(0, 3);
+            console.log('Images to process (limited to 3):', imagesToProcess.map(img => ({
                 src: img.src?.substring(0, 50) || 'NO_SRC',
                 dimensions: `${img.displayWidth}x${img.displayHeight}`,
                 testId: img.dataTestId
             })));
             
-            const ocrResults = await processImagesWithOCR(content.images);
-            console.log('OCR results:', ocrResults.length);
-            if (ocrResults.length > 0) {
-                content.ocrText = ocrResults.join('\n\n');
-                // Add OCR text to the main text content
-                content.textContent = (content.textContent || '') + '\n\n' + content.ocrText;
-                content.visibleText = (content.visibleText || '') + '\n\n' + content.ocrText;
-                console.log('Added OCR text to content:', content.ocrText);
-            } else {
-                console.log('No OCR text extracted from any images');
+            // Add timeout for OCR processing
+            const ocrPromise = processImagesWithOCR(imagesToProcess);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('OCR timeout')), 10000) // 10 second timeout
+            );
+            
+            try {
+                const ocrResults = await Promise.race([ocrPromise, timeoutPromise]);
+                console.log('OCR results:', ocrResults.length);
+                if (ocrResults.length > 0) {
+                    content.ocrText = ocrResults.join('\n\n');
+                    // Add OCR text to the main text content
+                    content.textContent = (content.textContent || '') + '\n\n' + content.ocrText;
+                    content.visibleText = (content.visibleText || '') + '\n\n' + content.ocrText;
+                    console.log('Added OCR text to content:', content.ocrText);
+                } else {
+                    console.log('No OCR text extracted from any images');
+                }
+            } catch (error) {
+                console.log('OCR processing failed or timed out:', error.message);
+                // Continue without OCR results
             }
         } else {
             console.log('No images found for OCR processing');
-            // Special handling for Twitter/X - try to find images in a different way
-            if (tab.url && tab.url.includes('x.com') || tab.url.includes('twitter.com')) {
-                console.log('Twitter/X detected - attempting alternative image detection...');
-                // This will be handled by the enhanced selectors above
-            }
         }
         
         return {
@@ -227,49 +248,79 @@ async function processImagesWithOCR(images) {
         try {
             console.log('Processing image:', image.src.substring(0, 100), 'Dimensions:', image.width, 'x', image.height);
             
+            // Skip certain image types that are unlikely to contain text
+            if (image.src && (
+                image.src.includes('.gif') || 
+                image.src.includes('.svg') ||
+                image.src.includes('avatar') ||
+                image.src.includes('profile') ||
+                image.src.includes('icon')
+            )) {
+                console.log('Skipping non-text image type:', image.src);
+                continue;
+            }
+            
             // Only process visible images that might contain text
             if (!image.isVisible) {
                 console.log('Skipping invisible image');
                 continue;
             }
             
-            // More lenient size requirements
-            if (image.displayWidth < 50 || image.displayHeight < 50) {
+            // More lenient size requirements but still filter out very small images
+            if (image.displayWidth < 100 || image.displayHeight < 100) {
                 console.log('Skipping small image:', image.displayWidth, 'x', image.displayHeight);
                 continue;
             }
             
-            // Fetch the image
-            console.log('Fetching image...');
-            const response = await fetch(image.src);
-            const blob = await response.blob();
-            const imageData = await blobToDataURL(blob);
+            // Add timeout for individual image processing (5 seconds max per image)
+            const imageProcessingPromise = (async () => {
+                // Fetch the image
+                console.log('Fetching image...');
+                const response = await fetch(image.src);
+                const blob = await response.blob();
+                const imageData = await blobToDataURL(blob);
+                
+                console.log('Sending to OCR API...');
+                // Send to OCR API
+                const ocrResponse = await fetch(`${CONFIG.backendUrl}/ocr`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        imageData: imageData,
+                        imageInfo: {
+                            src: image.src,
+                            width: image.width,
+                            height: image.height
+                        }
+                    })
+                });
+                
+                const ocrData = await ocrResponse.json();
+                console.log('OCR response:', ocrData);
+                
+                if (ocrData.success && ocrData.text && ocrData.text.trim().length > 0) {
+                    console.log('OCR success:', ocrData.text.trim());
+                    return `Image text: ${ocrData.text.trim()}`;
+                } else {
+                    console.log('OCR failed or no text:', ocrData.error || 'No text extracted');
+                    return null;
+                }
+            })();
             
-            console.log('Sending to OCR API...');
-            // Send to OCR API
-            const ocrResponse = await fetch(`${CONFIG.backendUrl}/ocr`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    imageData: imageData,
-                    imageInfo: {
-                        src: image.src,
-                        width: image.width,
-                        height: image.height
-                    }
-                })
-            });
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Image processing timeout')), 5000) // 5 second timeout per image
+            );
             
-            const ocrData = await ocrResponse.json();
-            console.log('OCR response:', ocrData);
-            
-            if (ocrData.success && ocrData.text && ocrData.text.trim().length > 0) {
-                ocrResults.push(`Image text: ${ocrData.text.trim()}`);
-                console.log('OCR success:', ocrData.text.trim());
-            } else {
-                console.log('OCR failed or no text:', ocrData.error || 'No text extracted');
+            try {
+                const result = await Promise.race([imageProcessingPromise, timeoutPromise]);
+                if (result) {
+                    ocrResults.push(result);
+                }
+            } catch (error) {
+                console.log('Image processing failed or timed out:', error.message);
+                // Continue to next image
             }
             
         } catch (error) {
@@ -522,36 +573,17 @@ function setLoading(loading) {
                 <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         `;
-        askButton.style.backgroundColor = '#667eea';
+        askButton.style.backgroundColor = '#4f46e5';
         askButton.style.color = 'white';
-    }
-    
-    if (loading) {
-        showLoading();
-        hideResponse();
-    } else {
-        hideLoading();
     }
 }
 
 /**
- * Show response
+ * Show response (deprecated - now handled directly in askQuestion)
  */
 function showResponse(response) {
-    // Add user message
-    addMessage(currentQuestion, 'user');
-    
-    // Add AI response with a small delay to prevent overlapping
-    setTimeout(() => {
-        addMessage(response, 'ai');
-    }, 100);
-    
-    // Clear input
-    if (questionInput) {
-        questionInput.value = '';
-        autoResizeTextarea();
-    }
-    
+    // This function is no longer used - messages are handled directly in askQuestion
+    addMessage(response, 'ai');
 }
 
 /**
@@ -582,6 +614,55 @@ function addMessage(content, sender) {
     
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+/**
+ * Add AI thinking message
+ */
+function addThinkingMessage() {
+    if (!messagesContainer) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'ai-message';
+    messageDiv.setAttribute('data-thinking', 'true');
+    
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 12px; color: #1f2937;">
+            <div class="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    `;
+    
+    messageDiv.appendChild(messageContent);
+    messagesContainer.appendChild(messageDiv);
+    
+    // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    return messageDiv;
+}
+
+/**
+ * Update message content
+ */
+function updateMessage(messageElement, newContent) {
+    if (!messageElement) return;
+    
+    const messageContent = messageElement.querySelector('.message-content');
+    if (messageContent) {
+        messageContent.innerHTML = formatMessage(newContent);
+        messageElement.removeAttribute('data-thinking');
+    }
+    
+    // Scroll to bottom
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 }
 
 /**
