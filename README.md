@@ -20,14 +20,14 @@ Chrome AI Assistant is a powerful browser extension that brings AI-powered conte
 - **PDF Text Extraction** - Read and analyze PDF documents directly in browser
 - **Real-time Content Processing** - Instant analysis of webpage content
 - **Voice Input Support** - Hands-free interaction with speech recognition
-- **Professional Chat Interface** - Modern, ChatGPT-like UI with light/dark themes
+- **Professional Chat Interface** - Modern UI with light/dark themes
 - **Smart Content Prioritization** - AI focuses on relevant content based on your questions
 - **Cross-Platform Compatibility** - Works on all websites and content types
 
 ## Live Demo
 
-- **Chrome Web Store**: [Install Extension](https://chrome.google.com/webstore) *(Coming Soon*
-- **GitHub Repository**: [View Source Code](https://github.com/rabumaabraham/Chrome-AI-Assistant)
+- **Chrome Web Store**: [Install Extension](https://chrome.google.com/webstore)
+- **Backend**: [Click here](https://github.com/rabumaabraham/Chrome-AI-Assistant)
 
 ## Tech Stack
 
@@ -45,7 +45,7 @@ Chrome AI Assistant is a powerful browser extension that brings AI-powered conte
 - **Sharp** - High-performance image processing
 
 ### AI Integration
-- **OpenRouter API** - Access to multiple AI models (GPT-4, Claude, etc.)
+- **OpenRouter API** - Access to multiple AI models (gpt-3.5-turbo, etc.)
 - **Content Intelligence** - Smart content filtering and prioritization
 - **Context-Aware Responses** - AI understands webpage context
 
@@ -79,20 +79,19 @@ npm start
 # 2. Enable "Developer mode"
 # 3. Click "Load unpacked" and select the chrome-extension folder
 ```
-
-### Production Installation
-
-1. Download the extension from Chrome Web Store *(Coming Soon*
-2. Click "Add to Chrome" to install
-3. No backend setup required - uses hosted services
-
 **Required API Keys:**
 - OpenRouter API key (for AI responses)
 - Backend server URL (for OCR and PDF processing)
 
+### Production Installation
+
+1. Download the extension from Chrome Web Store
+2. Click "Add to Chrome" to install
+3. No backend setup required - uses hosted services
+
 ## API Reference
 
-**Base URL:** `http://localhost:3000` (Development) or `https://your-backend-url.com` (Production)
+**Base URL:** `http://localhost:3000` (Development) or `https://render.com` (Production)
 
 ### AI Chat Endpoints
 - **POST** `/api/ask-ai` - Send question with webpage context to AI
@@ -193,12 +192,6 @@ AI: Processes voice input, analyzes webpage content, and responds with comprehen
 3. Update extension with production backend URL
 4. Monitor with health checks
 
-## Browser Compatibility
-
-- **Chrome** - Full support (primary platform)
-- **Edge** - Compatible with Chromium-based versions
-- **Opera** - Compatible with Chromium-based versions
-- **Brave** - Full compatibility
 
 ## Performance Optimizations
 
@@ -233,7 +226,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 - **Email:** iamrabuma@gmail.com
 - **Issues:** [GitHub Issues](https://github.com/rabumaabraham/Chrome-AI-Assistant/issues)
-- **Documentation:** [Wiki](https://github.com/rabumaabraham/Chrome-AI-Assistant/wiki)
 
 ---
 
