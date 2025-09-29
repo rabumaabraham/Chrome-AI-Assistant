@@ -27,7 +27,7 @@ Chrome AI Assistant is a powerful browser extension that brings AI-powered conte
 ## Live Demo
 
 - **Chrome Web Store**: [Install Extension](https://chrome.google.com/webstore)
-- **Backend**: [Click here](https://github.com/rabumaabraham/Chrome-AI-Assistant)
+- **Backend**: [Click here](https://chrome-ai-assistant.onrender.com)
 
 ## Tech Stack
 
@@ -91,7 +91,7 @@ npm start
 
 ## API Reference
 
-**Base URL:** `http://localhost:3000` (Development) or `https://render.com` (Production)
+**Base URL:** `http://localhost:3000` (Development) or `https://chrome-ai-assistant.onrender.com` (Production)
 
 ### AI Chat Endpoints
 - **POST** `/api/ask-ai` - Send question with webpage context to AI
@@ -229,4 +229,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Transform your browsing experience with AI-powered content analysis. Install Chrome AI Assistant today and never miss important information on any webpage!**
+**Transform your browsing experience with AI-powered content analysis!**
