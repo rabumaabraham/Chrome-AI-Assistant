@@ -7,7 +7,7 @@
 
 // Configuration
 const CONFIG = {
-    backendUrl: 'https://your-backend-url.onrender.com/api', // Replace with your actual Render URL
+    backendUrl: 'https://chrome-ai-assistant.onrender.com/api',
     timeout: 30000
 };
 
