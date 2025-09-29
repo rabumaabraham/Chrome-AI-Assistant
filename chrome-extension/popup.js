@@ -7,7 +7,7 @@
 
 // Configuration
 const CONFIG = {
-    backendUrl: 'http://localhost:3000/api',
+    backendUrl: 'https://your-backend-url.onrender.com/api', // Replace with your actual Render URL
     timeout: 30000
 };
 
