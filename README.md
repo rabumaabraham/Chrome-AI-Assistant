@@ -7,11 +7,10 @@ Chrome AI Assistant is a powerful browser extension that brings AI-powered conte
 
 ## Table of Contents
 1. [Features](#features)
-2. [Live Demo](#live-demo)
-3. [Tech Stack](#tech-stack)
-4. [Installation](#installation)
-5. [API Reference](#api-reference)
-6. [Usage Examples](#usage-examples)
+2. [Tech Stack](#tech-stack)
+3. [Installation](#installation)
+4. [API Reference](#api-reference)
+5. [Usage Examples](#usage-examples)
 
 ## Features
 
@@ -24,10 +23,9 @@ Chrome AI Assistant is a powerful browser extension that brings AI-powered conte
 - **Smart Content Prioritization** - AI focuses on relevant content based on your questions
 - **Cross-Platform Compatibility** - Works on all websites and content types
 
-## Live Demo
+## Install Extension
 
 - **Chrome Web Store**: [Install Extension](https://chrome.google.com/webstore)
-- **Backend**: [Click here](https://chrome-ai-assistant.onrender.com)
 
 ## Tech Stack
 
