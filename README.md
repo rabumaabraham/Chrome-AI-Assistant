@@ -166,7 +166,9 @@ AI: Processes voice input, analyzes webpage content, and responds with comprehen
 </p>
 
 <details>
-  <summary>View full-size screenshots</summary>
+  <summary><kbd>▶ View full-size screenshots</kbd> (click to expand)</summary>
+
+  <p align="center"><sub>▲ Click to collapse</sub></p>
 
   <p align="center">
     <img alt="Screenshot 1 full" src="chrome-extension/templates/screenshots/screenshot%201.png">
