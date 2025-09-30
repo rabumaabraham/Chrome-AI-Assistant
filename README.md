@@ -11,6 +11,7 @@ Chrome AI Assistant is a powerful browser extension that brings AI-powered conte
 3. [Installation](#installation)
 4. [API Reference](#api-reference)
 5. [Usage Examples](#usage-examples)
+6. [Screenshots](#screenshots)
 
 ## Features
 
@@ -155,6 +156,24 @@ AI: Extracts and analyzes PDF content, providing detailed summaries, key points,
 User: *Speaks* "Explain the main points from this article"
 AI: Processes voice input, analyzes webpage content, and responds with comprehensive explanations.
 ```
+
+## Screenshots
+
+<p align="center">
+  <img alt="Screenshot 1" src="chrome-extension/templates/screenshots/screenshot%201.png" width="28%">
+  <img alt="Screenshot 2" src="chrome-extension/templates/screenshots/screenshot%202.png" width="28%">
+  <img alt="Screenshot 3" src="chrome-extension/templates/screenshots/screenshot%203.png" width="28%">
+</p>
+
+<details>
+  <summary>View full-size screenshots</summary>
+
+  <p align="center">
+    <img alt="Screenshot 1 full" src="chrome-extension/templates/screenshots/screenshot%201.png">
+    <img alt="Screenshot 2 full" src="chrome-extension/templates/screenshots/screenshot%202.png">
+    <img alt="Screenshot 3 full" src="chrome-extension/templates/screenshots/screenshot%203.png">
+  </p>
+</details>
 
 ## Content Processing Features
 
