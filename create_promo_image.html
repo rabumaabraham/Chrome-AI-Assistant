@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chrome Extension Promotional Image Generator</title>
+</head>
+<body>
+    <div style="text-align: center; padding: 20px;">
+        <h2>Chrome AI Assistant - Promotional Image Generator</h2>
+        
+        <div style="margin: 20px;">
+            <button onclick="createSmallPromo()" style="padding: 10px 20px; margin: 10px; background: #4A90E2; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Create Small Promo (440x280)
+            </button>
+            <button onclick="createMarqueePromo()" style="padding: 10px 20px; margin: 10px; background: #357ABD; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Create Marquee Promo (1400x560)
+            </button>
+        </div>
+        
+        <div style="margin: 20px;">
+            <canvas id="smallCanvas" width="440" height="280" style="border: 2px solid #ccc; margin: 10px;"></canvas>
+        </div>
+        
+        <div style="margin: 20px;">
+            <canvas id="marqueeCanvas" width="1400" height="560" style="border: 2px solid #ccc; margin: 10px;"></canvas>
+        </div>
+        
+        <div style="margin: 20px;">
+            <button onclick="downloadSmallPromo()" style="padding: 10px 20px; margin: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Download Small Promo
+            </button>
+            <button onclick="downloadMarqueePromo()" style="padding: 10px 20px; margin: 10px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                Download Marquee Promo
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function createSmallPromo() {
+            const canvas = document.getElementById('smallCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, 440, 280);
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 440, 280);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 440, 280);
+            
+            // Add subtle pattern overlay
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            for (let i = 0; i < 20; i++) {
+                ctx.beginPath();
+                ctx.arc(Math.random() * 440, Math.random() * 280, Math.random() * 3, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            
+            // Add AI brain/neural network pattern
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 2;
+            
+            // Draw neural network lines
+            const nodes = [
+                {x: 80, y: 80}, {x: 150, y: 60}, {x: 220, y: 80},
+                {x: 290, y: 60}, {x: 360, y: 80}, {x: 80, y: 140},
+                {x: 150, y: 120}, {x: 220, y: 140}, {x: 290, y: 120},
+                {x: 360, y: 140}, {x: 80, y: 200}, {x: 150, y: 180},
+                {x: 220, y: 200}, {x: 290, y: 180}, {x: 360, y: 200}
+            ];
+            
+            // Draw connections
+            for (let i = 0; i < nodes.length - 1; i++) {
+                if (Math.random() > 0.6) {
+                    ctx.beginPath();
+                    ctx.moveTo(nodes[i].x, nodes[i].y);
+                    ctx.lineTo(nodes[i + 1].x, nodes[i + 1].y);
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw nodes
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            nodes.forEach(node => {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, 4, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            
+            // Add central AI icon
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.font = 'bold 60px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('AI', 220, 140);
+            
+            // Add subtle glow effect
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+            ctx.shadowBlur = 10;
+            ctx.fillText('AI', 220, 140);
+            ctx.shadowBlur = 0;
+        }
+        
+        function createMarqueePromo() {
+            const canvas = document.getElementById('marqueeCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, 1400, 560);
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 1400, 560);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(0.5, '#764ba2');
+            gradient.addColorStop(1, '#f093fb');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1400, 560);
+            
+            // Add subtle pattern overlay
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+            for (let i = 0; i < 50; i++) {
+                ctx.beginPath();
+                ctx.arc(Math.random() * 1400, Math.random() * 560, Math.random() * 4, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            
+            // Add larger neural network pattern
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 3;
+            
+            // Draw more complex neural network
+            const nodes = [];
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 15; col++) {
+                    nodes.push({
+                        x: 100 + col * 80 + Math.random() * 20,
+                        y: 80 + row * 50 + Math.random() * 20
+                    });
+                }
+            }
+            
+            // Draw connections
+            for (let i = 0; i < nodes.length - 1; i++) {
+                if (Math.random() > 0.7) {
+                    ctx.beginPath();
+                    ctx.moveTo(nodes[i].x, nodes[i].y);
+                    ctx.lineTo(nodes[i + 1].x, nodes[i + 1].y);
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw nodes
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            nodes.forEach(node => {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            
+            // Add central AI elements
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.font = 'bold 120px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('AI', 700, 280);
+            
+            // Add Chrome extension icon representation
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.font = 'bold 40px Arial';
+            ctx.fillText('Chrome Extension', 700, 380);
+            
+            // Add subtle glow effect
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+            ctx.shadowBlur = 15;
+            ctx.fillText('AI', 700, 280);
+            ctx.shadowBlur = 0;
+        }
+        
+        function downloadSmallPromo() {
+            const canvas = document.getElementById('smallCanvas');
+            const link = document.createElement('a');
+            link.download = 'chrome-ai-assistant-small-promo.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        function downloadMarqueePromo() {
+            const canvas = document.getElementById('marqueeCanvas');
+            const link = document.createElement('a');
+            link.download = 'chrome-ai-assistant-marquee-promo.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Create initial images
+        createSmallPromo();
+        createMarqueePromo();
+    </script>
+</body>
+</html>
