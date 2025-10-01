@@ -1,15 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Chrome AI Assistant",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "Professional AI-powered assistant for webpage content analysis, PDF reading, image OCR, and voice input",
   "permissions": [
     "activeTab",
-    "storage",
     "scripting",
     "tabs",
-    "contextMenus",
-    "clipboardWrite"
+    "contextMenus"
   ],
   "optional_permissions": [
     "microphone"
