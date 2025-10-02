@@ -32,6 +32,7 @@ jobs:
         npm test
       env:
         NODE_ENV: test
+        OPENROUTER_API_KEY: 'test-key'
         
     - name: Check code quality
       run: |
@@ -64,7 +65,7 @@ jobs:
         
     - name: Test Docker build
       run: |
-        docker build -t chrome-ai-assistant-test ./backend
+        docker build -t chrome-ai-assistant-test -f backend/Dockerfile ./backend
         
     - name: Test Docker Compose
       run: |
