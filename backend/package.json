@@ -6,6 +6,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch",
+    "lint": "echo 'No linting configured'",
+    "build": "echo 'No build step required'",
     "clean": "rimraf logs/*.log"
   },
   "keywords": [
@@ -37,7 +41,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
   },
   "engines": {
     "node": ">=18.0.0"
