@@ -1,6 +1,6 @@
 {
   "name": "ai-assistant-backend",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Backend API for AI Assistant Chrome Extension - Professional, Scalable Architecture",
   "main": "src/server.js",
   "scripts": {
