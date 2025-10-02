@@ -4,9 +4,10 @@
  */
 
 const request = require('supertest');
-const { startServer } = require('../server.js');
+const Application = require('../app.js');
 
 describe('Health Check API', () => {
+    let app;
     let server;
     
     beforeAll(async () => {
@@ -15,17 +16,19 @@ describe('Health Check API', () => {
         process.env.OPENROUTER_API_KEY = 'test-key';
         process.env.PORT = '3001';
         
-        server = await startServer();
+        // Create and start the application
+        app = new Application();
+        server = await app.start();
     });
     
     afterAll(async () => {
         if (server) {
-            server.close();
+            await new Promise(resolve => server.close(resolve));
         }
     });
     
     test('Health endpoint should return 200', async () => {
-        const response = await request(server)
+        const response = await request(app.app)
             .get('/api/health')
             .expect(200);
             
@@ -34,7 +37,7 @@ describe('Health Check API', () => {
     });
     
     test('Root endpoint should return 200', async () => {
-        const response = await request(server)
+        const response = await request(app.app)
             .get('/api')
             .expect(200);
             
