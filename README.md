@@ -5,7 +5,7 @@
 
 Chrome AI Assistant is a powerful browser extension that brings AI-powered content analysis directly to any webpage. Simply click the extension icon on any website, PDF, or image, and get instant AI insights without leaving your current page. The extension automatically extracts content from webpages, reads text from images via OCR, processes PDF documents, and provides intelligent responses using advanced AI models.
 
-## Table of Contents
+## Quick Navigation
 1. [Features](#features)
 2. [Tech Stack](#tech-stack)
 3. [Installation](#installation)
