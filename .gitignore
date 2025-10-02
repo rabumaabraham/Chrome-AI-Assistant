@@ -143,7 +143,7 @@ public/uploads/
 # PM2 logs
 .pm2/
 
-# Docker
-.dockerignore
-Dockerfile
-docker-compose.yml
+# Docker (keep Docker files in repo for CI/CD)
+# .dockerignore - keep this file
+# Dockerfile - keep Dockerfiles in repo
+# docker-compose.yml - keep this file

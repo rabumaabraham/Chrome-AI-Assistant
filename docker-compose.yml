@@ -1,0 +1,64 @@
+services:
+  # Backend API Service
+  ai-assistant-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chrome-ai-assistant-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-openai/gpt-3.5-turbo}
+      - MAX_TOKENS=${MAX_TOKENS:-4000}
+      - TEMPERATURE=${TEMPERATURE:-0.7}
+      - RATE_LIMIT_WINDOW=${RATE_LIMIT_WINDOW:-900000}
+      - RATE_LIMIT_MAX=${RATE_LIMIT_MAX:-100}
+      - OCR_LANGUAGE=${OCR_LANGUAGE:-eng}
+      - MAX_IMAGE_SIZE=${MAX_IMAGE_SIZE:-5242880}
+      - MAX_IMAGES_PER_REQUEST=${MAX_IMAGES_PER_REQUEST:-3}
+      - MAX_PDF_SIZE=${MAX_PDF_SIZE:-10485760}
+      - MAX_PDF_PAGES=${MAX_PDF_PAGES:-50}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - CACHE_ENABLED=${CACHE_ENABLED:-false}
+    volumes:
+      # Mount logs directory for persistence
+      - ./backend/logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ai-assistant-network
+
+  # Optional: Add a reverse proxy (nginx) for production
+  nginx:
+    image: nginx:alpine
+    container_name: chrome-ai-assistant-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - ai-assistant-backend
+    restart: unless-stopped
+    networks:
+      - ai-assistant-network
+    profiles:
+      - production
+
+networks:
+  ai-assistant-network:
+    driver: bridge
+
+volumes:
+  logs:
+    driver: local

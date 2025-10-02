@@ -65,13 +65,7 @@ jobs:
         
     - name: Test Docker build
       working-directory: ./backend
-      run: |
-        echo "Current directory: $(pwd)"
-        echo "Files in current directory:"
-        ls -la
-        echo "Checking if Dockerfile exists:"
-        ls -la Dockerfile
-        docker build -t chrome-ai-assistant-test .
+      run: docker build -t chrome-ai-assistant-test .
         
     - name: Test Docker Compose
       run: |
