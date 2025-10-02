@@ -1,7 +1,7 @@
 # Chrome AI Assistant
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-![version](https://img.shields.io/badge/version-1.1.9-blue)
+![version](https://img.shields.io/badge/version-1.1.10-blue)
 
 Chrome AI Assistant is a powerful browser extension that brings AI-powered content analysis directly to any webpage. Simply click the extension icon on any website, PDF, or image, and get instant AI insights without leaving your current page. The extension automatically extracts content from webpages, reads text from images via OCR, processes PDF documents, and provides intelligent responses using advanced AI models.
 
@@ -26,7 +26,7 @@ Chrome AI Assistant is a powerful browser extension that brings AI-powered conte
 
 ## Install Extension
 
-- **Chrome Web Store**: [Install Extension](https://chrome.google.com/webstore)
+- **Chrome Web Store**: [Install Extension](https://chromewebstore.google.com/detail/bcoaoaimnkbcajebhompljgmiaclbnkm?utm_source=item-share-cb)
 
 ## Tech Stack
 
