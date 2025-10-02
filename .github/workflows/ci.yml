@@ -64,8 +64,13 @@ jobs:
         npm run build || echo "No build script found"
         
     - name: Test Docker build
+      working-directory: ./backend
       run: |
-        cd backend
+        echo "Current directory: $(pwd)"
+        echo "Files in current directory:"
+        ls -la
+        echo "Checking if Dockerfile exists:"
+        ls -la Dockerfile
         docker build -t chrome-ai-assistant-test .
         
     - name: Test Docker Compose
