@@ -106,7 +106,7 @@ npm start
 
 ### Production Installation
 
-1. Download the extension from Chrome Web Store
+1. Download the extension from [Chrome Web Store](https://chromewebstore.google.com/detail/bcoaoaimnkbcajebhompljgmiaclbnkm?utm_source=item-share-cb)
 2. Click "Add to Chrome" to install
 3. No backend setup required - uses hosted services
 
@@ -217,21 +217,6 @@ AI: Processes voice input, analyzes webpage content, and responds with comprehen
 - **Personalized Responses** - Tailored answers based on content type
 - **Real-time Processing** - Instant responses with optimized performance
 
-## Docker Deployment
-
-For detailed Docker setup and deployment instructions, see [DOCKER_SETUP.md](DOCKER_SETUP.md).
-
-### Quick Docker Commands
-```bash
-# Start development environment
-docker-compose up -d
-
-# Stop services
-docker-compose down
-
-# View logs
-docker-compose logs -f
-```
 
 ## Deployment
 

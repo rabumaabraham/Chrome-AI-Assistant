@@ -46,7 +46,7 @@ docker-compose ps
 ## Production Deployment
 
 ### Current Setup
-- **Backend**: Deployed on Render (https://chrome-ai-assistant.onrender.com)
+- **Backend**: Deployed on Render
 - **Extension**: Published to Chrome Web Store
 - **Local Development**: Docker containerization
 
