@@ -1,6 +1,8 @@
 // Configuration
 const CONFIG = {
-    backendUrl: 'https://chrome-ai-assistant.onrender.com/api',
+    localBackendUrl: 'http://localhost:3000/api',
+    remoteBackendUrl: 'https://chrome-ai-assistant.onrender.com/api',
+    backendUrl: null, // Will be set automatically
     timeout: 30000
 };
 
@@ -11,7 +13,7 @@ let isRecording = false;
 let recognition = null;
 
 // DOM Elements
-let questionInput, askButton, voiceButton, themeToggle, themeIcon, githubButton, messagesContainer, loading, notification;
+let questionInput, askButton, voiceButton, themeToggle, themeIcon, githubButton, messagesContainer, loading, notification, serverIndicator;
 
 // Theme state
 let isDarkMode = false;
@@ -20,7 +22,9 @@ let isDarkMode = false;
 document.addEventListener('DOMContentLoaded', () => {
     initializeElements();
     setupEventListeners();
-    checkBackendHealth();
+    // Start with indicator hidden
+    updateServerIndicator('connecting');
+    initializeBackend();
 });
 
 /**
@@ -36,6 +40,7 @@ function initializeElements() {
     messagesContainer = document.getElementById('messagesContainer');
     loading = document.getElementById('loading');
     notification = document.getElementById('notification');
+    serverIndicator = document.getElementById('serverIndicator');
     
     // Auto-resize textarea
     if (questionInput) {
@@ -175,16 +180,9 @@ async function extractPageContent(tab) {
         const content = results[0]?.result || {};
         
         // Process images with OCR if there are any (limit to 3 images max for speed)
-        console.log('Found images for OCR:', content.images?.length || 0);
         if (content.images && content.images.length > 0) {
-            console.log('Processing images with OCR...');
             // Limit to first 3 images for faster processing
             const imagesToProcess = content.images.slice(0, 3);
-            console.log('Images to process (limited to 3):', imagesToProcess.map(img => ({
-                src: img.src?.substring(0, 50) || 'NO_SRC',
-                dimensions: `${img.displayWidth}x${img.displayHeight}`,
-                testId: img.dataTestId
-            })));
             
             // Add timeout for OCR processing
             const ocrPromise = processImagesWithOCR(imagesToProcess);
@@ -194,22 +192,15 @@ async function extractPageContent(tab) {
             
             try {
                 const ocrResults = await Promise.race([ocrPromise, timeoutPromise]);
-                console.log('OCR results:', ocrResults.length);
                 if (ocrResults.length > 0) {
                     content.ocrText = ocrResults.join('\n\n');
                     // Add OCR text to the main text content
                     content.textContent = (content.textContent || '') + '\n\n' + content.ocrText;
                     content.visibleText = (content.visibleText || '') + '\n\n' + content.ocrText;
-                    console.log('Added OCR text to content:', content.ocrText);
-                } else {
-                    console.log('No OCR text extracted from any images');
                 }
             } catch (error) {
-                console.log('OCR processing failed or timed out:', error.message);
                 // Continue without OCR results
             }
-        } else {
-            console.log('No images found for OCR processing');
         }
         
         return {
@@ -235,11 +226,8 @@ async function extractPageContent(tab) {
 async function processImagesWithOCR(images) {
     const ocrResults = [];
     
-    console.log('Processing', images.length, 'images for OCR');
-    
     for (const image of images) {
         try {
-            console.log('Processing image:', image.src.substring(0, 100), 'Dimensions:', image.width, 'x', image.height);
             
             // Skip certain image types that are unlikely to contain text
             if (image.src && (
@@ -249,31 +237,26 @@ async function processImagesWithOCR(images) {
                 image.src.includes('profile') ||
                 image.src.includes('icon')
             )) {
-                console.log('Skipping non-text image type:', image.src);
                 continue;
             }
             
             // Only process visible images that might contain text
             if (!image.isVisible) {
-                console.log('Skipping invisible image');
                 continue;
             }
             
             // More lenient size requirements but still filter out very small images
             if (image.displayWidth < 100 || image.displayHeight < 100) {
-                console.log('Skipping small image:', image.displayWidth, 'x', image.displayHeight);
                 continue;
             }
             
             // Add timeout for individual image processing (5 seconds max per image)
             const imageProcessingPromise = (async () => {
                 // Fetch the image
-                console.log('Fetching image...');
                 const response = await fetch(image.src);
                 const blob = await response.blob();
                 const imageData = await blobToDataURL(blob);
                 
-                console.log('Sending to OCR API...');
                 // Send to OCR API
                 const ocrResponse = await fetch(`${CONFIG.backendUrl}/ocr`, {
                     method: 'POST',
@@ -291,13 +274,10 @@ async function processImagesWithOCR(images) {
                 });
                 
                 const ocrData = await ocrResponse.json();
-                console.log('OCR response:', ocrData);
                 
                 if (ocrData.success && ocrData.text && ocrData.text.trim().length > 0) {
-                    console.log('OCR success:', ocrData.text.trim());
                     return `Image text: ${ocrData.text.trim()}`;
                 } else {
-                    console.log('OCR failed or no text:', ocrData.error || 'No text extracted');
                     return null;
                 }
             })();
@@ -312,16 +292,14 @@ async function processImagesWithOCR(images) {
                     ocrResults.push(result);
                 }
             } catch (error) {
-                console.log('Image processing failed or timed out:', error.message);
                 // Continue to next image
             }
             
         } catch (error) {
-            console.error('OCR processing failed for image:', image.src, error);
+            // Continue to next image
         }
     }
     
-    console.log('OCR processing complete. Results:', ocrResults.length);
     return ocrResults;
 }
 
@@ -534,9 +512,61 @@ function updateVoiceButton() {
 }
 
 /**
+ * Initialize backend - auto-detect which server to use
+ */
+async function initializeBackend() {
+    // Try local server first
+    try {
+        const response = await fetch(`${CONFIG.localBackendUrl}/health`, {
+            method: 'GET',
+            timeout: 3000 // 3 second timeout for local
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                CONFIG.backendUrl = CONFIG.localBackendUrl;
+                updateServerIndicator('local');
+                return;
+            }
+        }
+    } catch (error) {
+        // Local server not available, continue to remote
+    }
+    
+    // Fallback to remote server
+    try {
+        const response = await fetch(`${CONFIG.remoteBackendUrl}/health`, {
+            method: 'GET',
+            timeout: 10000 // 10 second timeout for remote
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                CONFIG.backendUrl = CONFIG.remoteBackendUrl;
+                updateServerIndicator('remote');
+                return;
+            }
+        }
+    } catch (error) {
+        // Remote server not available
+    }
+    
+    // No servers available
+    CONFIG.backendUrl = CONFIG.remoteBackendUrl; // Default fallback
+    updateServerIndicator('fallback');
+}
+
+/**
  * Check backend health
  */
 async function checkBackendHealth() {
+    if (!CONFIG.backendUrl) {
+        await initializeBackend();
+        return;
+    }
+    
     try {
         const response = await fetch(`${CONFIG.backendUrl}/health`);
         const data = await response.json();
@@ -772,6 +802,37 @@ function hideLoading() {
 }
 
 /**
+ * Update server indicator
+ */
+function updateServerIndicator(serverType) {
+    if (!serverIndicator) return;
+    
+    switch (serverType) {
+        case 'local':
+            serverIndicator.innerHTML = 'Local';
+            serverIndicator.style.color = 'white';
+            serverIndicator.title = 'Connected to local server';
+            serverIndicator.style.display = 'block';
+            break;
+        case 'remote':
+            serverIndicator.innerHTML = 'Remote';
+            serverIndicator.style.color = 'white';
+            serverIndicator.title = 'Connected to remote server';
+            serverIndicator.style.display = 'block';
+            break;
+        case 'fallback':
+            serverIndicator.innerHTML = 'Fallback';
+            serverIndicator.style.color = 'white';
+            serverIndicator.title = 'Using fallback server';
+            serverIndicator.style.display = 'block';
+            break;
+        default:
+            // Hide the indicator while connecting
+            serverIndicator.style.display = 'none';
+    }
+}
+
+/**
  * Show notification
  */
 function showNotification(message, type = 'info') {
@@ -830,8 +891,6 @@ function extractPageContentInTab() {
             
             const allImages = Array.from(document.querySelectorAll(selectors.join(', ')));
             
-            console.log('Total images found:', allImages.length);
-            
             return allImages
                 .map(img => {
                     // Get actual rendered dimensions
@@ -854,14 +913,6 @@ function extractPageContentInTab() {
                         dataTestId: img.getAttribute('data-testid')
                     };
                     
-                    // Debug info
-                    console.log('Processing image:', {
-                        src: imageData.src?.substring(0, 100) || 'NO_SRC',
-                        dimensions: `${imageData.displayWidth}x${imageData.displayHeight}`,
-                        visible: imageData.isVisible,
-                        testId: imageData.dataTestId,
-                        className: imageData.className
-                    });
                     
                     return imageData;
                 })
@@ -982,10 +1033,9 @@ function extractPageContentInTab() {
                             tagName: 'CANVAS',
                             isCanvas: true
                         });
-                        console.log('Found canvas image:', canvas.width, 'x', canvas.height);
                     }
                 } catch (e) {
-                    console.log('Canvas extraction failed:', e.message);
+                    // Continue to next canvas
                 }
             });
             
@@ -1042,4 +1092,4 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-console.log('✅ Popup script loaded successfully with voice support');
+// Extension loaded

@@ -14,6 +14,7 @@
   ],
   "host_permissions": [
     "http://localhost:3000/*",
+    "https://chrome-ai-assistant.onrender.com/*",
     "https://rabumaabraham.github.io/*",
     "https://openrouter.ai/*"
   ],

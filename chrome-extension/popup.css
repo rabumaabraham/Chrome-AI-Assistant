@@ -70,6 +70,17 @@ body {
     gap: 8px;
 }
 
+.server-indicator {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
 .header-btn {
     width: 32px;
     height: 32px;

@@ -79,6 +79,24 @@ router.get('/ocr/health', OCRController.healthCheck.bind(OCRController));
 router.post('/pdf/extract', validateRequest(schemas.pdf), PDFController.extractText.bind(PDFController));
 router.get('/pdf/health', PDFController.healthCheck.bind(PDFController));
 
+// Root Route
+router.get('/', (req, res) => {
+    res.json({
+        success: true,
+        message: 'Chrome AI Assistant API is running!',
+        service: 'Chrome AI Assistant API',
+        version: process.env.npm_package_version || '1.0.0',
+        environment: process.env.NODE_ENV || 'development',
+        timestamp: new Date().toISOString(),
+        endpoints: {
+            health: '/api/health',
+            ai: '/api/ask-ai',
+            ocr: '/api/ocr',
+            pdf: '/api/pdf/extract'
+        }
+    });
+});
+
 // Health Check Route
 router.get('/health', (req, res) => {
     res.json({
