@@ -11,7 +11,6 @@ Chrome AI Assistant is a powerful browser extension that brings AI-powered conte
 3. [Installation](#installation)
 4. [API Reference](#api-reference)
 5. [Usage Examples](#usage-examples)
-6. [Screenshots](#screenshots)
 
 ## Features
 
@@ -57,6 +56,28 @@ Chrome AI Assistant is a powerful browser extension that brings AI-powered conte
 
 ### Development Setup
 
+#### Option 1: Docker (Recommended)
+
+```bash
+# Clone repository
+git clone https://github.com/rabumaabraham/Chrome-AI-Assistant.git
+cd Chrome-AI-Assistant
+
+# Setup environment
+cp .env.example .env
+# Add your OpenRouter API key to .env
+
+# Start with Docker
+docker-compose up -d
+
+# Load Extension in Chrome
+# 1. Open Chrome and go to chrome://extensions/
+# 2. Enable "Developer mode"
+# 3. Click "Load unpacked" and select the chrome-extension folder
+```
+
+#### Option 2: Manual Setup
+
 ```bash
 # Clone repository
 git clone https://github.com/rabumaabraham/Chrome-AI-Assistant.git
@@ -78,6 +99,7 @@ npm start
 # 2. Enable "Developer mode"
 # 3. Click "Load unpacked" and select the chrome-extension folder
 ```
+
 **Required API Keys:**
 - OpenRouter API key (for AI responses)
 - Backend server URL (for OCR and PDF processing)
@@ -194,6 +216,22 @@ AI: Processes voice input, analyzes webpage content, and responds with comprehen
 - **Multi-modal Processing** - Combines text, images, and PDF content
 - **Personalized Responses** - Tailored answers based on content type
 - **Real-time Processing** - Instant responses with optimized performance
+
+## Docker Deployment
+
+For detailed Docker setup and deployment instructions, see [DOCKER_SETUP.md](DOCKER_SETUP.md).
+
+### Quick Docker Commands
+```bash
+# Start development environment
+docker-compose up -d
+
+# Stop services
+docker-compose down
+
+# View logs
+docker-compose logs -f
+```
 
 ## Deployment
 
