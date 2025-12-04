@@ -41,12 +41,12 @@ function initializeElements() {
     loading = document.getElementById('loading');
     notification = document.getElementById('notification');
     serverIndicator = document.getElementById('serverIndicator');
-    
+
     // Auto-resize textarea
     if (questionInput) {
         questionInput.addEventListener('input', autoResizeTextarea);
     }
-    
+
     // Load saved theme
     loadTheme();
 }
@@ -58,32 +58,32 @@ function setupEventListeners() {
     if (askButton) {
         askButton.addEventListener('click', handleAskQuestion);
     }
-    
-        if (questionInput) {
-            questionInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleAskQuestion();
-                }
-            });
-        }
-        
-        // Add keyboard shortcut for voice input (Ctrl+Shift+V)
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.shiftKey && e.key === 'V') {
+
+    if (questionInput) {
+        questionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                handleVoiceToggle();
+                handleAskQuestion();
             }
         });
-    
+    }
+
+    // Add keyboard shortcut for voice input (Ctrl+Shift+V)
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'V') {
+            e.preventDefault();
+            handleVoiceToggle();
+        }
+    });
+
     if (themeToggle) {
         themeToggle.addEventListener('click', handleThemeToggle);
     }
-    
+
     if (githubButton) {
         githubButton.addEventListener('click', handleGithubClick);
     }
-    
+
     if (voiceButton) {
         voiceButton.addEventListener('click', handleVoiceToggle);
     }
@@ -96,45 +96,45 @@ async function handleAskQuestion() {
     if (isLoading) {
         return;
     }
-    
+
     const question = questionInput?.value?.trim();
     if (!question) {
         // No notification for empty question - just return
-            return;
-        }
-        
+        return;
+    }
+
     // Processing question
-    
+
     // First, add user message immediately
     currentQuestion = question;
     addMessage(currentQuestion, 'user');
-    
+
     // Clear input immediately
     if (questionInput) {
         questionInput.value = '';
         autoResizeTextarea();
     }
-    
+
     try {
         // Create AI message bubble with "AI is thinking..." immediately
         const aiMessageId = addThinkingMessage();
-        
+
         // Get current tab
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        
+
         // Extract page content
         const pageContent = await extractPageContent(tab);
-        
+
         // Send to AI
         const response = await askAI(question, pageContent);
-        
+
         if (response.success) {
             // Replace "AI is thinking..." with actual response
             updateMessage(aiMessageId, response.answer);
         } else {
             throw new Error(response.error || 'AI request failed');
         }
-        
+
     } catch (error) {
         // If there's an error, remove the thinking message
         const aiMessage = document.querySelector('.ai-message[data-thinking="true"]');
@@ -152,7 +152,7 @@ async function extractPageContent(tab) {
     try {
         // Check if it's a PDF
         const isPdfUrl = tab.url && tab.url.toLowerCase().includes('.pdf');
-        
+
         if (isPdfUrl) {
             try {
                 const pdfContent = await extractPDFFromURL(tab.url);
@@ -170,26 +170,26 @@ async function extractPageContent(tab) {
                 // PDF extraction failed, continue with regular extraction
             }
         }
-        
+
         // Extract regular page content
         const results = await chrome.scripting.executeScript({
             target: { tabId: tab.id },
             func: extractPageContentInTab
         });
-        
+
         const content = results[0]?.result || {};
-        
+
         // Process images with OCR if there are any (limit to 3 images max for speed)
         if (content.images && content.images.length > 0) {
             // Limit to first 3 images for faster processing
             const imagesToProcess = content.images.slice(0, 3);
-            
+
             // Add timeout for OCR processing
             const ocrPromise = processImagesWithOCR(imagesToProcess);
-            const timeoutPromise = new Promise((_, reject) => 
+            const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('OCR timeout')), 10000) // 10 second timeout
             );
-            
+
             try {
                 const ocrResults = await Promise.race([ocrPromise, timeoutPromise]);
                 if (ocrResults.length > 0) {
@@ -202,13 +202,13 @@ async function extractPageContent(tab) {
                 // Continue without OCR results
             }
         }
-        
+
         return {
             url: tab.url,
             title: tab.title,
             ...content
         };
-        
+
     } catch (error) {
         return {
             url: tab.url,
@@ -225,13 +225,13 @@ async function extractPageContent(tab) {
  */
 async function processImagesWithOCR(images) {
     const ocrResults = [];
-    
+
     for (const image of images) {
         try {
-            
+
             // Skip certain image types that are unlikely to contain text
             if (image.src && (
-                image.src.includes('.gif') || 
+                image.src.includes('.gif') ||
                 image.src.includes('.svg') ||
                 image.src.includes('avatar') ||
                 image.src.includes('profile') ||
@@ -239,24 +239,24 @@ async function processImagesWithOCR(images) {
             )) {
                 continue;
             }
-            
+
             // Only process visible images that might contain text
             if (!image.isVisible) {
                 continue;
             }
-            
+
             // More lenient size requirements but still filter out very small images
             if (image.displayWidth < 100 || image.displayHeight < 100) {
                 continue;
             }
-            
+
             // Add timeout for individual image processing (5 seconds max per image)
             const imageProcessingPromise = (async () => {
                 // Fetch the image
                 const response = await fetch(image.src);
                 const blob = await response.blob();
                 const imageData = await blobToDataURL(blob);
-                
+
                 // Send to OCR API
                 const ocrResponse = await fetch(`${CONFIG.backendUrl}/ocr`, {
                     method: 'POST',
@@ -272,20 +272,20 @@ async function processImagesWithOCR(images) {
                         }
                     })
                 });
-                
+
                 const ocrData = await ocrResponse.json();
-                
+
                 if (ocrData.success && ocrData.text && ocrData.text.trim().length > 0) {
                     return `Image text: ${ocrData.text.trim()}`;
                 } else {
                     return null;
                 }
             })();
-            
-            const timeoutPromise = new Promise((_, reject) => 
+
+            const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Image processing timeout')), 5000) // 5 second timeout per image
             );
-            
+
             try {
                 const result = await Promise.race([imageProcessingPromise, timeoutPromise]);
                 if (result) {
@@ -294,12 +294,12 @@ async function processImagesWithOCR(images) {
             } catch (error) {
                 // Continue to next image
             }
-            
+
         } catch (error) {
             // Continue to next image
         }
     }
-    
+
     return ocrResults;
 }
 
@@ -311,7 +311,7 @@ async function extractPDFFromURL(url) {
         const response = await fetch(url);
         const pdfBlob = await response.blob();
         const pdfData = await blobToDataURL(pdfBlob);
-        
+
         const result = await fetch(`${CONFIG.backendUrl}/pdf/extract`, {
             method: 'POST',
             headers: {
@@ -321,15 +321,15 @@ async function extractPDFFromURL(url) {
                 pdfData: pdfData
             })
         });
-        
+
         const data = await result.json();
-        
+
         if (data.success && data.text) {
             return data.text;
         } else {
             throw new Error(data.error || 'PDF extraction failed');
         }
-        
+
     } catch (error) {
         return null;
     }
@@ -341,20 +341,20 @@ async function extractPDFFromURL(url) {
 async function askAI(question, context) {
     try {
         const response = await fetch(`${CONFIG.backendUrl}/ask-ai`, {
-                method: 'POST',
-                headers: {
+            method: 'POST',
+            headers: {
                 'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
+            },
+            body: JSON.stringify({
                 question: question,
                 context: context,
                 url: context.url
-                })
-            });
+            })
+        });
 
         const data = await response.json();
         return data;
-        
+
     } catch (error) {
         throw error;
     }
@@ -377,12 +377,12 @@ function handleVoiceToggle() {
         // Request in progress - no notification needed
         return;
     }
-    
+
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
         showNotification('Speech recognition not supported', 'error');
         return;
     }
-    
+
     if (isRecording) {
         stopVoiceRecording();
     } else {
@@ -398,16 +398,16 @@ function startVoiceRecording() {
         // Initialize speech recognition
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
-        
+
         recognition.continuous = false;
         recognition.interimResults = false;
         recognition.lang = 'en-US';
-        
+
         // Update UI
         isRecording = true;
         updateVoiceButton();
         // Voice recording started - update button state only
-        
+
         // Handle results
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
@@ -416,13 +416,13 @@ function startVoiceRecording() {
             }
             // Voice input received - no notification needed
         };
-        
+
         // Handle errors
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
             let errorMessage = 'Voice recognition failed';
-            
-            switch(event.error) {
+
+            switch (event.error) {
                 case 'no-speech':
                     errorMessage = 'No speech detected.';
                     break;
@@ -445,11 +445,11 @@ function startVoiceRecording() {
                     errorMessage = 'Voice recognition failed.';
                     break;
             }
-            
+
             showNotification(errorMessage, 'error');
             stopVoiceRecording();
         };
-        
+
         // Handle end
         recognition.onend = () => {
             stopVoiceRecording();
@@ -460,11 +460,11 @@ function startVoiceRecording() {
                 }, 500); // Small delay to ensure UI updates
             }
         };
-        
+
         // Start recognition
         recognition.start();
 
-        } catch (error) {
+    } catch (error) {
         console.error('Voice recording setup failed:', error);
         showNotification('Voice recording failed', 'error');
         isRecording = false;
@@ -479,7 +479,7 @@ function stopVoiceRecording() {
     if (recognition && isRecording) {
         recognition.stop();
     }
-    
+
     isRecording = false;
     updateVoiceButton();
 }
@@ -512,33 +512,17 @@ function updateVoiceButton() {
 }
 
 /**
- * Initialize backend - auto-detect which server to use
+ * Initialize backend - manual server selection
+ * To test locally: Comment out REMOTE SERVER block and uncomment LOCAL SERVER block
  */
 async function initializeBackend() {
-    // Try local server first
-    try {
-        const response = await fetch(`${CONFIG.localBackendUrl}/health`, {
-            method: 'GET',
-            timeout: 3000 // 3 second timeout for local
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-                CONFIG.backendUrl = CONFIG.localBackendUrl;
-                updateServerIndicator('local');
-                return;
-            }
-        }
-    } catch (error) {
-        // Local server not available, continue to remote
-    }
-    
-    // Fallback to remote server
+    // ========================================
+    // REMOTE SERVER (Render) - Active by default
+    // To disable: Comment out this entire block
+    // ========================================
     try {
         const response = await fetch(`${CONFIG.remoteBackendUrl}/health`, {
-            method: 'GET',
-            timeout: 10000 // 10 second timeout for remote
+            method: 'GET'
         });
         
         if (response.ok) {
@@ -549,13 +533,46 @@ async function initializeBackend() {
                 return;
             }
         }
+        // If health check fails, still set the URL (connection might work later)
+        CONFIG.backendUrl = CONFIG.remoteBackendUrl;
+        updateServerIndicator('fallback');
     } catch (error) {
-        // Remote server not available
+        console.error('Remote server connection failed:', error);
+        // Still set the URL even if connection fails (will try again on API calls)
+        CONFIG.backendUrl = CONFIG.remoteBackendUrl;
+        updateServerIndicator('fallback');
     }
+
+
+    // ========================================
+    // LOCAL SERVER - Commented out by default
+    // To enable: Uncomment this entire block and comment out REMOTE SERVER block above
+    // ========================================
+    /*
+    try {
+        const response = await fetch(`${CONFIG.localBackendUrl}/health`, {
+            method: 'GET'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                CONFIG.backendUrl = CONFIG.localBackendUrl;
+                updateServerIndicator('local');
+                return;
+            }
+        }
+        // If health check fails, still set the URL (connection might work later)
+        CONFIG.backendUrl = CONFIG.localBackendUrl;
+        updateServerIndicator('fallback');
+    } catch (error) {
+        console.error('Local server connection failed:', error);
+        // Still set the URL even if connection fails (will try again on API calls)
+        CONFIG.backendUrl = CONFIG.localBackendUrl;
+        updateServerIndicator('fallback');
+    }
+    */
     
-    // No servers available
-    CONFIG.backendUrl = CONFIG.remoteBackendUrl; // Default fallback
-    updateServerIndicator('fallback');
 }
 
 /**
@@ -566,11 +583,11 @@ async function checkBackendHealth() {
         await initializeBackend();
         return;
     }
-    
+
     try {
         const response = await fetch(`${CONFIG.backendUrl}/health`);
         const data = await response.json();
-        
+
         if (data.success) {
             // Backend connected - no notification needed
         } else {
@@ -586,7 +603,7 @@ async function checkBackendHealth() {
  */
 function setLoading(loading) {
     isLoading = loading;
-    
+
     if (askButton) {
         askButton.disabled = loading;
         // Keep the original SVG icon always
@@ -621,20 +638,20 @@ function hideResponse() {
  */
 function addMessage(content, sender) {
     if (!messagesContainer) return;
-    
+
     console.log('Adding message:', sender, content);
-    
+
     const messageDiv = document.createElement('div');
     messageDiv.className = `${sender}-message`;
-    
+
     const messageContent = document.createElement('div');
     messageContent.className = 'message-content';
     messageContent.innerHTML = formatMessage(content);
-    
+
     messageDiv.appendChild(messageContent);
-    
+
     messagesContainer.appendChild(messageDiv);
-    
+
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
@@ -644,11 +661,11 @@ function addMessage(content, sender) {
  */
 function addThinkingMessage() {
     if (!messagesContainer) return;
-    
+
     const messageDiv = document.createElement('div');
     messageDiv.className = 'ai-message';
     messageDiv.setAttribute('data-thinking', 'true');
-    
+
     const messageContent = document.createElement('div');
     messageContent.className = 'message-content';
     messageContent.innerHTML = `
@@ -660,13 +677,13 @@ function addThinkingMessage() {
             </div>
         </div>
     `;
-    
+
     messageDiv.appendChild(messageContent);
     messagesContainer.appendChild(messageDiv);
-    
+
     // Scroll to bottom
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    
+
     return messageDiv;
 }
 
@@ -675,13 +692,13 @@ function addThinkingMessage() {
  */
 function updateMessage(messageElement, newContent) {
     if (!messageElement) return;
-    
+
     const messageContent = messageElement.querySelector('.message-content');
     if (messageContent) {
         messageContent.innerHTML = formatMessage(newContent);
         messageElement.removeAttribute('data-thinking');
     }
-    
+
     // Scroll to bottom
     if (messagesContainer) {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -699,7 +716,7 @@ function formatMessage(content) {
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/\n/g, '<br>');
-    
+
     return formatted;
 }
 
@@ -727,7 +744,7 @@ function handleThemeToggle() {
  */
 function applyTheme() {
     const body = document.body;
-    
+
     if (isDarkMode) {
         body.classList.add('dark-theme');
         // Update icon to moon
@@ -806,7 +823,7 @@ function hideLoading() {
  */
 function updateServerIndicator(serverType) {
     if (!serverIndicator) return;
-    
+
     switch (serverType) {
         case 'local':
             serverIndicator.innerHTML = 'Local';
@@ -840,7 +857,7 @@ function showNotification(message, type = 'info') {
         notification.textContent = message;
         notification.className = `notification ${type}`;
         notification.style.display = 'block';
-        
+
         setTimeout(() => {
             notification.style.display = 'none';
         }, 2000);
@@ -888,15 +905,15 @@ function extractPageContentInTab() {
                 '[data-testid*="image"]', '[data-testid*="photo"]',
                 '[aria-label*="image"]', '[aria-label*="photo"]'
             ];
-            
+
             const allImages = Array.from(document.querySelectorAll(selectors.join(', ')));
-            
+
             return allImages
                 .map(img => {
                     // Get actual rendered dimensions
                     const rect = img.getBoundingClientRect();
                     const style = window.getComputedStyle(img);
-                    
+
                     const imageData = {
                         src: img.src || img.getAttribute('data-src') || img.getAttribute('data-lazy') || img.getAttribute('data-original'),
                         alt: img.alt,
@@ -912,8 +929,8 @@ function extractPageContentInTab() {
                         id: img.id,
                         dataTestId: img.getAttribute('data-testid')
                     };
-                    
-                    
+
+
                     return imageData;
                 })
                 .filter(img => img.src && (img.src.startsWith('http') || img.src.startsWith('data:')))
@@ -925,17 +942,17 @@ function extractPageContentInTab() {
         const isPDFViewer = () => {
             const url = window.location.href;
             const isPdfUrl = url.toLowerCase().includes('.pdf');
-            
+
             const embed = document.querySelector('embed[type="application/pdf"]');
             const object = document.querySelector('object[type="application/pdf"]');
             const viewer = document.querySelector('#viewer, .pdfViewer, .pdf-viewer, [data-pdf-viewer]');
-            
+
             return isPdfUrl || embed || object || viewer;
         };
 
         const extractPDFContent = () => {
             if (!isPDFViewer()) return null;
-            
+
             try {
                 // Try multiple methods to extract PDF text
                 const methods = [
@@ -944,7 +961,7 @@ function extractPageContentInTab() {
                     () => document.body.innerText,
                     () => document.body.textContent
                 ];
-                
+
                 for (const method of methods) {
                     try {
                         const text = method();
@@ -955,7 +972,7 @@ function extractPageContentInTab() {
                         continue;
                     }
                 }
-                
+
                 return null;
             } catch (error) {
                 console.error('PDF content extraction failed:', error);
@@ -971,7 +988,7 @@ function extractPageContentInTab() {
         const extractVisibleText = () => {
             // Simple approach: get all text from visible elements
             let allText = '';
-            
+
             // Try different methods to get comprehensive text
             const methods = [
                 () => document.body.innerText,
@@ -991,7 +1008,7 @@ function extractPageContentInTab() {
                     return text;
                 }
             ];
-            
+
             for (const method of methods) {
                 try {
                     const text = method().trim();
@@ -1002,7 +1019,7 @@ function extractPageContentInTab() {
                     // Continue with next method
                 }
             }
-            
+
             return allText;
         };
 
@@ -1012,12 +1029,12 @@ function extractPageContentInTab() {
         const visibleText = extractVisibleText();
         const headings = extractHeadings();
         const images = extractImages();
-        
+
         // Additional fallback: try to capture canvas elements that might contain images
         const extractCanvasImages = () => {
             const canvases = Array.from(document.querySelectorAll('canvas'));
             const canvasImages = [];
-            
+
             canvases.forEach(canvas => {
                 try {
                     if (canvas.width > 100 && canvas.height > 100) {
@@ -1038,10 +1055,10 @@ function extractPageContentInTab() {
                     // Continue to next canvas
                 }
             });
-            
+
             return canvasImages;
         };
-        
+
         const canvasImages = extractCanvasImages();
         const allImages = [...images, ...canvasImages];
 
