@@ -25,7 +25,7 @@ class EnhancedAIService {
             baseURL: config.ai.baseUrl,
             defaultHeaders: {
                 'HTTP-Referer': 'http://localhost:3000',
-                'X-Title': 'Chrome AI Assistant'
+                'X-Title': 'SnapQuery'
             }
         });
     }

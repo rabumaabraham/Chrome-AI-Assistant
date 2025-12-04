@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chrome AI Assistant</title>
+    <title>SnapQuery</title>
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -11,18 +11,7 @@
         <!-- Header -->
         <header class="header">
             <div class="logo">
-                <div class="logo-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="12" cy="5" r="2" stroke="currentColor" stroke-width="2"/>
-                        <path d="M12 7v4" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="8" cy="16" r="1" fill="currentColor"/>
-                        <circle cx="16" cy="16" r="1" fill="currentColor"/>
-                        <path d="M6 11h12" stroke="currentColor" stroke-width="2"/>
-                        <path d="M9 19h6" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                </div>
-                <span class="title">Chrome AI Assistant</span>
+                <span class="title">SnapQuery</span>
             </div>
             <div class="header-actions">
                 <div id="serverIndicator" class="server-indicator" title="Server Status" style="display: none;"></div>
@@ -39,11 +28,6 @@
                         <path d="M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                     </svg>
                 </button>
-                <button id="githubBtn" class="header-btn" title="View on GitHub">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C6.477 2 2 6.484 2 12.017C2 16.624 5.865 20.5 10.839 21.5C11.339 21.6 11.5 21.267 11.5 20.979C11.5 20.724 11.492 20.015 11.488 19.064C8.155 19.706 7.567 17.795 7.567 17.795C7.125 16.729 6.484 16.396 6.484 16.396C5.594 15.721 6.557 15.734 6.557 15.734C7.548 15.806 8.084 16.835 8.084 16.835C8.947 18.416 10.372 17.991 11.515 17.712C11.603 17.082 11.846 16.658 12.117 16.384C9.394 16.106 6.538 15.238 6.538 11.355C6.538 10.341 6.923 9.512 8.104 8.88C7.999 8.604 7.664 7.572 8.204 6.155C8.204 6.155 9.01 5.863 11.475 7.482C12.275 7.241 13.137 7.121 14 7.117C14.863 7.121 15.725 7.241 16.525 7.482C18.99 5.863 19.796 6.155 19.796 6.155C20.336 7.572 20.001 8.604 19.896 8.88C21.077 9.512 21.462 10.341 21.462 11.355C21.462 15.249 18.604 16.104 15.875 16.375C16.221 16.667 16.525 17.243 16.525 18.124C16.525 19.394 16.514 20.418 16.514 20.979C16.514 21.267 16.674 21.6 17.179 21.5C22.153 20.5 26 16.624 26 12.017C26 6.484 21.522 2 16 2H12Z" fill="currentColor"/>
-                    </svg>
-                </button>
             </div>
         </header>
 
@@ -53,7 +37,7 @@
             <div id="messagesContainer" class="messages-container">
                 <div class="welcome-message">
                     <div class="message-content welcome-content">
-                        <p>Hi! I'm your AI assistant. Ask me anything about the current webpage, PDF, or images.</p>
+                        <p>I'm already reading your screen! Ask me anything about what's currently open - this webpage, PDF, or images.</p>
                     </div>
                 </div>
             </div>

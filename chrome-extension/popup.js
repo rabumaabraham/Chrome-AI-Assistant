@@ -13,7 +13,7 @@ let isRecording = false;
 let recognition = null;
 
 // DOM Elements
-let questionInput, askButton, voiceButton, themeToggle, themeIcon, githubButton, messagesContainer, loading, notification, serverIndicator;
+let questionInput, askButton, voiceButton, themeToggle, themeIcon, messagesContainer, loading, notification, serverIndicator;
 
 // Theme state
 let isDarkMode = false;
@@ -36,7 +36,6 @@ function initializeElements() {
     voiceButton = document.getElementById('voiceBtn');
     themeToggle = document.getElementById('themeToggle');
     themeIcon = document.getElementById('themeIcon');
-    githubButton = document.getElementById('githubBtn');
     messagesContainer = document.getElementById('messagesContainer');
     loading = document.getElementById('loading');
     notification = document.getElementById('notification');
@@ -78,10 +77,6 @@ function setupEventListeners() {
 
     if (themeToggle) {
         themeToggle.addEventListener('click', handleThemeToggle);
-    }
-
-    if (githubButton) {
-        githubButton.addEventListener('click', handleGithubClick);
     }
 
     if (voiceButton) {
@@ -790,15 +785,6 @@ function loadTheme() {
     applyTheme();
 }
 
-/**
- * Handle GitHub button click
- */
-function handleGithubClick() {
-    // Open GitHub repository in a new tab
-    chrome.tabs.create({
-        url: 'https://github.com/rabumaabraham/Chrome-AI-Assistant'
-    });
-}
 
 /**
  * Show loading

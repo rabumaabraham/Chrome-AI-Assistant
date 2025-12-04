@@ -33,7 +33,7 @@ describe('Health Check API', () => {
             .expect(200);
             
         expect(response.body.success).toBe(true);
-        expect(response.body.service).toBe('Chrome AI Assistant API');
+        expect(response.body.service).toBe('SnapQuery API');
     });
     
     test('Root endpoint should return 200', async () => {

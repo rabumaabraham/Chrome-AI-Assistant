@@ -23,7 +23,7 @@ class AIService {
             baseURL: config.ai.baseUrl,
             defaultHeaders: {
                 'HTTP-Referer': 'https://github.com/rabumaabraham/Chrome-AI-Assistant',
-                'X-Title': 'Chrome AI Assistant'
+                'X-Title': 'SnapQuery'
             }
         });
     }

@@ -1,9 +1,9 @@
-# Chrome AI Assistant
+# SnapQuery
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 ![version](https://img.shields.io/badge/version-1.2.0-blue)
 
-Chrome AI Assistant is a powerful browser extension that brings AI-powered content analysis directly to any webpage. Simply click the extension icon on any website, PDF, or image, and get instant AI insights without leaving your current page. The extension automatically extracts content from webpages, reads text from images via OCR, processes PDF documents, and provides intelligent responses using advanced AI models.
+SnapQuery is a powerful browser extension that brings AI-powered content analysis directly to any webpage. Simply click the extension icon on any website, PDF, or image, and get instant AI insights without leaving your current page. The extension automatically extracts content from webpages, reads text from images via OCR, processes PDF documents, and provides intelligent responses using advanced AI models.
 
 ## Quick Navigation
 1. [Features](#features)

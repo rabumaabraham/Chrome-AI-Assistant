@@ -1,7 +1,7 @@
 {
   "name": "ai-assistant-backend",
   "version": "1.2.0",
-  "description": "Backend API for AI Assistant Chrome Extension - Professional, Scalable Architecture",
+  "description": "Backend API for SnapQuery Chrome Extension - Professional, Scalable Architecture",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

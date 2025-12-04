@@ -4,7 +4,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: chrome-ai-assistant-backend
+    container_name: snapquery-backend
     ports:
       - "3000:3000"
     environment:
@@ -40,7 +40,7 @@ services:
   # Optional: Add a reverse proxy (nginx) for production
   nginx:
     image: nginx:alpine
-    container_name: chrome-ai-assistant-nginx
+    container_name: snapquery-nginx
     ports:
       - "80:80"
       - "443:443"

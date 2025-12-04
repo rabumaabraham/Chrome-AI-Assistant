@@ -83,8 +83,8 @@ router.get('/pdf/health', PDFController.healthCheck.bind(PDFController));
 router.get('/', (req, res) => {
     res.json({
         success: true,
-        message: 'Chrome AI Assistant API is running!',
-        service: 'Chrome AI Assistant API',
+        message: 'SnapQuery API is running!',
+        service: 'SnapQuery API',
         version: process.env.npm_package_version || '1.0.0',
         environment: process.env.NODE_ENV || 'development',
         timestamp: new Date().toISOString(),
@@ -101,7 +101,7 @@ router.get('/', (req, res) => {
 router.get('/health', (req, res) => {
     res.json({
         success: true,
-        service: 'Chrome AI Assistant API',
+        service: 'SnapQuery API',
         version: process.env.npm_package_version || '1.0.0',
         environment: process.env.NODE_ENV || 'development',
         timestamp: new Date().toISOString(),

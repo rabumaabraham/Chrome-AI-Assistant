@@ -1,8 +1,8 @@
-# Privacy Policy for Chrome AI Assistant
+# Privacy Policy for SnapQuery
 
 ## Data Collection and Usage
 
-Chrome AI Assistant is designed with privacy in mind. Here's how we handle your data:
+SnapQuery is designed with privacy in mind. Here's how we handle your data:
 
 ### What We Collect
 - **Content Analysis**: The extension analyzes webpage content, images, and PDFs to provide AI responses

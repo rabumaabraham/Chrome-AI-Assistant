@@ -9,7 +9,7 @@ const logger = require('./services/Logger.js');
 
 async function startServer() {
     try {
-        logger.info('Starting Chrome AI Assistant Backend', {
+        logger.info('Starting SnapQuery Backend', {
             version: process.env.npm_package_version || '1.0.0',
             environment: config.server.environment,
             port: config.server.port
@@ -19,7 +19,7 @@ async function startServer() {
         const app = new Application();
         await app.start();
 
-        logger.info('Chrome AI Assistant Backend is ready', {
+        logger.info('SnapQuery Backend is ready', {
             url: `http://${config.server.host}:${config.server.port}`,
             environment: config.server.environment
         });

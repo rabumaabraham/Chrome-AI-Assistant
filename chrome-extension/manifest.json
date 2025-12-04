@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Chrome AI Assistant",
+  "name": "SnapQuery",
   "version": "1.2.0",
   "description": "Professional AI-powered assistant for webpage content analysis, PDF reading, image OCR, and voice input",
   "permissions": [
@@ -23,19 +23,19 @@
   },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "AI Assistant",
+    "default_title": "SnapQuery",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "icons/128pngICON.png",
+      "32": "icons/128pngICON.png",
+      "48": "icons/128pngICON.png",
+      "128": "icons/128pngICON.png"
     }
   },
   "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons/128pngICON.png",
+    "32": "icons/128pngICON.png",
+    "48": "icons/128pngICON.png",
+    "128": "icons/128pngICON.png"
   },
   "web_accessible_resources": [
     {
